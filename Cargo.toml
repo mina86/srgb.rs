@@ -1,0 +1,15 @@
+[package]
+name          = "srgb"
+description   = "sRGB primitives and constants — lightweight crate with functions and constants needed when manipulating sRGB colours"
+version       = "0.1.0"
+readme        = "README.md"
+keywords      = ["srgb", "xyz", "color", "rgb"]
+authors       = ["Michal Nazarewicz <mina86@mina86.com>"]
+license       = "LGPL-3.0-or-later"
+repository    = "https://github.com/mina86/srgb"
+documentation = "https://docs.rs/srgb"
+edition       = "2018"
+
+[dev-dependencies]
+approx = "0.4"
+delta_e = "^0.2"
