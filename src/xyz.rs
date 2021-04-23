@@ -39,61 +39,7 @@ pub fn linear_from_xyz(xyz: [f32; 3]) -> [f32; 3] {
 }
 
 
-/// xyY coordinates of the D65 reference white-point used in sRGB colour space.
-#[allow(non_upper_case_globals)]
-pub const D65_xyY: [f32; 3] = [
-    D65_x_NUM as f32 / D65_DENOM as f32,
-    D65_y_NUM as f32 / D65_DENOM as f32,
-    1.0,
-];
-
-/* X = x/y
- * Y = 1
- * Z = (1 - x - y) / y
- */
-/// XYZ coordinates of the D65 reference white-point used in sRGB colour space.
-pub const D65_XYZ: [f32; 3] = [
-    D65_x_NUM as f32 / D65_y_NUM as f32,
-    1.0,
-    (D65_DENOM - D65_x_NUM - D65_y_NUM) as f32 / D65_y_NUM as f32,
-];
-
-
-/// The basis conversion matrix from moving from linear sRGB space to XYZ colour
-/// space.  To perform the conversion it’s typically more convenient to use the
-/// xyz_from_linear() function instead of accessing this constant.
-///
-/// The matrix is built with the assumption that colours are represented as
-/// one-column matrices.  With that, converting from sRGB to XYZ is done by the
-/// following formula: `XYZ = XYZ_FROM_SRGB_MATRIX ✕ RGB`.
-#[rustfmt::skip]
-pub const XYZ_FROM_SRGB_MATRIX: [[f32; 3]; 3] = [
-    [0.4124108464885388,   0.3575845678529519,  0.18045380393360833],
-    [0.21264934272065283,  0.7151691357059038,  0.07218152157344333],
-    [0.019331758429150258, 0.11919485595098397, 0.9503900340503373],
-];
-
-/// The basis conversion matrix from moving from XYZ to linear sRGB colour
-/// space.  To perform the conversion it’s typically more convenient to use the
-/// linear_from_xyz() function instead of accessing this constant.
-///
-/// The matrix is built with the assumption that colours are represented as
-/// one-column matrices.  With that, converting from XYZ to sRGB is done by the
-/// following formula: `RGB = SRGB_FROM_XYZ_MATRIX ✕ XYZ`.
-#[rustfmt::skip]
-pub const SRGB_FROM_XYZ_MATRIX: [[f32; 3]; 3] = [
-    [ 3.240812398895283,    -1.5373084456298136, -0.4985865229069666],
-    [-0.9692430170086407,    1.8759663029085742,  0.04155503085668564],
-    [ 0.055638398436112804, -0.20400746093241362, 1.0571295702861434],
-];
-
-
-#[allow(non_upper_case_globals)]
-const D65_x_NUM: u32 = 312713;
-#[allow(non_upper_case_globals)]
-const D65_y_NUM: u32 = 329016;
-#[allow(non_upper_case_globals)]
-const D65_DENOM: u32 = 1000000;
+include!(concat!(env!("OUT_DIR"), "/xyz_constants.rs"));
 
 
 #[inline(always)]

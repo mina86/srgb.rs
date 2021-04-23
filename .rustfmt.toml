@@ -15,5 +15,4 @@ overflow_delimited_expr = true
 reorder_imports = true
 reorder_modules = true
 use_field_init_shorthand = true
-use_small_heuristics = "Max"
 use_try_shorthand = true
