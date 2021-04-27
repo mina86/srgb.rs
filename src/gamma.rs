@@ -20,6 +20,7 @@
 /// let red = [expand_u8(212), expand_u8(33), expand_u8(61)];
 /// assert_eq!([0.6583748, 0.015208514, 0.046665084], red);
 /// ```
+#[inline]
 pub fn expand_u8(e: u8) -> f32 {
     if e > 10 {
         const A: f32 = 0.055 * 255.0;
@@ -54,6 +55,7 @@ pub fn expand_u8(e: u8) -> f32 {
 /// let red = [compress_u8(red[0]), compress_u8(red[1]), compress_u8(red[2])];
 /// assert_eq!([212, 33, 61], red);
 /// ```
+#[inline]
 pub fn compress_u8(s: f32) -> u8 {
     let e = if s > 0.0031308 {
         const A: f32 = 0.055 * 255.0;
@@ -89,6 +91,7 @@ pub fn compress_u8(s: f32) -> u8 {
 /// red.iter_mut().for_each(|c| *c = expand_normalised(*c));
 /// assert_eq!([0.6583748, 0.015208514, 0.046665084], red);
 /// ```
+#[inline]
 pub fn expand_normalised(e: f32) -> f32 {
     const E_0: f32 = 12.92 * 0.00313066844250060782371;
     if e > E_0 {
@@ -119,6 +122,7 @@ pub fn expand_normalised(e: f32) -> f32 {
 /// red.iter_mut().for_each(|c| *c = compress_normalised(*c));
 /// assert_eq!([0.8313725, 0.12941176, 0.23921567], red);
 /// ```
+#[inline]
 pub fn compress_normalised(s: f32) -> f32 {
     if s > 0.0031308 {
         crate::maths::mul_add(1.055, s.powf(1.0 / 2.4), -0.055)

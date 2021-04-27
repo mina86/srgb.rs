@@ -42,6 +42,7 @@ pub use xyz::xyz_from_linear;
 ///     srgb::normalised_from_u8([212, 33, 61])
 /// );
 /// ```
+#[inline]
 pub fn normalised_from_u8(encoded: [u8; 3]) -> [f32; 3] {
     arr_map(encoded, |v| v as f32 / 255.0)
 }
@@ -65,6 +66,7 @@ pub fn normalised_from_u8(encoded: [u8; 3]) -> [f32; 3] {
 ///     srgb::u8_from_normalised([0.83137256, 0.12941177, 0.23921569])
 /// );
 /// ```
+#[inline]
 pub fn u8_from_normalised(normalised: [f32; 3]) -> [u8; 3] {
     // Adding 0.5 is for rounding.
     arr_map(normalised, |v| {
@@ -90,6 +92,7 @@ pub fn u8_from_normalised(normalised: [f32; 3]) -> [u8; 3] {
 ///     srgb::linear_from_u8([212, 33, 61])
 /// );
 /// ```
+#[inline]
 pub fn linear_from_u8(encoded: [u8; 3]) -> [f32; 3] {
     arr_map(encoded, gamma::expand_u8)
 }
@@ -111,6 +114,7 @@ pub fn linear_from_u8(encoded: [u8; 3]) -> [f32; 3] {
 ///     srgb::u8_from_linear([0.6583748, 0.015208514, 0.046665084])
 /// );
 /// ```
+#[inline]
 pub fn u8_from_linear(linear: [f32; 3]) -> [u8; 3] {
     arr_map(linear, gamma::compress_u8)
 }
@@ -134,6 +138,7 @@ pub fn u8_from_linear(linear: [f32; 3]) -> [u8; 3] {
 ///     srgb::linear_from_normalised([0.83137256, 0.12941177, 0.23921569])
 /// );
 /// ```
+#[inline]
 pub fn linear_from_normalised(normalised: [f32; 3]) -> [f32; 3] {
     arr_map(normalised, gamma::expand_normalised)
 }
@@ -156,12 +161,14 @@ pub fn linear_from_normalised(normalised: [f32; 3]) -> [f32; 3] {
 ///     srgb::linear_from_normalised([0.83137256, 0.12941177, 0.23921569])
 /// );
 /// ```
+#[inline]
 pub fn normalised_from_linear(linear: [f32; 3]) -> [f32; 3] {
     arr_map(linear, gamma::compress_normalised)
 }
 
 
 
+#[inline]
 fn arr_map<F: Copy, T: Copy, Fun: Fn(F) -> T>(arr: [F; 3], f: Fun) -> [T; 3] {
     [f(arr[0]), f(arr[1]), f(arr[2])]
 }
