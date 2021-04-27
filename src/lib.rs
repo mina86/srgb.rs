@@ -22,9 +22,6 @@ pub mod xyz;
 
 mod maths;
 
-pub use xyz::linear_from_xyz;
-pub use xyz::xyz_from_linear;
-
 
 /// Converts a 24-bit sRGB colour (also known as true colour) into normalised
 /// representation.  Returns three components each normalised to the range 0–1.
@@ -43,6 +40,7 @@ pub use xyz::xyz_from_linear;
 /// );
 /// ```
 #[inline]
+#[doc(hidden)]
 pub fn normalised_from_u8(encoded: [u8; 3]) -> [f32; 3] {
     arr_map(encoded, |v| v as f32 / 255.0)
 }
@@ -67,6 +65,7 @@ pub fn normalised_from_u8(encoded: [u8; 3]) -> [f32; 3] {
 /// );
 /// ```
 #[inline]
+#[doc(hidden)]
 pub fn u8_from_normalised(normalised: [f32; 3]) -> [u8; 3] {
     // Adding 0.5 is for rounding.
     arr_map(normalised, |v| {
@@ -75,100 +74,44 @@ pub fn u8_from_normalised(normalised: [f32; 3]) -> [u8; 3] {
 }
 
 
-/// Converts a 24-bit sRGB colour (also known as true colour) into linear space.
-/// That is, performs gamma expansion on each component and returns the colour
-/// in linear sRGB space with each component normalised to the range 0–1.
+/// Converts a colour in an XYZ colour space into 24-bit sRGB representation.
 ///
-/// This is just a convenience wrapper around [`gamma::expand_u8()`] function.
-///
-/// # Example
-/// ```
-/// assert_eq!(
-///     [0.8148465, 0.80695224, 0.7991027],
-///     srgb::linear_from_u8([233, 232, 231])
-/// );
-/// assert_eq!(
-///     [0.6583748, 0.015208514, 0.046665084],
-///     srgb::linear_from_u8([212, 33, 61])
-/// );
-/// ```
-#[inline]
-pub fn linear_from_u8(encoded: [u8; 3]) -> [f32; 3] {
-    arr_map(encoded, gamma::expand_u8)
+/// This is just a convenience function which wraps gamma (see ['gamma'] module)
+/// and XYZ (see ['xyz'] module) conversions function together.
+pub fn u8_from_xyz(xyz: [f32; 3]) -> [u8; 3] {
+    gamma::u8_from_linear(xyz::linear_from_xyz(xyz))
 }
 
-/// Converts an sRGB colour in linear space to a 24-bit sRGB colour (also known
-/// as true colour).  That is, performs gamma compression on each component and
-/// encodes each component as an 8-bit integer.
+/// Converts a 24-bit sRGB colour into XYZ colour space.
 ///
-/// This is just a convenience wrapper around [`gamma::compress_u8()`] function.
+/// This is just a convenience function which wraps gamma (see ['gamma'] module)
+/// and XYZ (see ['xyz'] module) conversions function together.
+pub fn xyz_from_u8(rgb: [u8; 3]) -> [f32; 3] {
+    xyz::xyz_from_linear(gamma::linear_from_u8(rgb))
+}
+
+/// Converts a colour in an XYZ colour space into a normalised sRGB
+/// representation.
 ///
-/// # Example
-/// ```
-/// assert_eq!(
-///     [233, 232, 231],
-///     srgb::u8_from_linear([0.8148465, 0.80695224, 0.7991027])
-/// );
-/// assert_eq!(
-///     [212, 33, 61],
-///     srgb::u8_from_linear([0.6583748, 0.015208514, 0.046665084])
-/// );
-/// ```
-#[inline]
-pub fn u8_from_linear(linear: [f32; 3]) -> [u8; 3] {
-    arr_map(linear, gamma::compress_u8)
+/// This is just a convenience function which wraps gamma (see ['gamma'] module)
+/// and XYZ (see ['xyz'] module) conversions function together.
+pub fn normalised_from_xyz(xyz: [f32; 3]) -> [f32; 3] {
+    gamma::normalised_from_linear(xyz::linear_from_xyz(xyz))
+}
+
+/// Converts a normalised representation of a sRGB colour into XYZ colour space.
+///
+/// This is just a convenience function which wraps gamma (see ['gamma'] module)
+/// and XYZ (see ['xyz'] module) conversions function together.
+pub fn xyz_from_normalised(rgb: [f32; 3]) -> [f32; 3] {
+    xyz::xyz_from_linear(gamma::linear_from_normalised(rgb))
 }
 
 
-/// Converts an sRGB colour in normalised representation into linear space.
-/// That is, performs gamma expansion on each component (which should be in 0–1
-/// range) and returns the colour in linear space.
-///
-/// This is just a convenience wrapper around [`gamma::expand_normalised()`]
-/// function.
-///
-/// # Example
-/// ```
-/// assert_eq!(
-///     [0.8148467, 0.80695236, 0.79910284],
-///     srgb::linear_from_normalised([0.9137255, 0.9098039, 0.90588236])
-/// );
-/// assert_eq!(
-///     [0.65837485, 0.015208514, 0.046665084],
-///     srgb::linear_from_normalised([0.83137256, 0.12941177, 0.23921569])
-/// );
-/// ```
 #[inline]
-pub fn linear_from_normalised(normalised: [f32; 3]) -> [f32; 3] {
-    arr_map(normalised, gamma::expand_normalised)
-}
-
-/// Converts an sRGB colour in linear space to normalised space.  That is,
-/// performs gamma compression on each component (which should be in 0–1 range)
-/// and encodes each component as an 8-bit integer.
-///
-/// This is just a convenience wrapper around [`gamma::compress_normalised()`]
-/// function.
-///
-/// # Example
-/// ```
-/// assert_eq!(
-///     [0.8148467, 0.80695236, 0.79910284],
-///     srgb::linear_from_normalised([0.9137255, 0.9098039, 0.90588236])
-/// );
-/// assert_eq!(
-///     [0.65837485, 0.015208514, 0.046665084],
-///     srgb::linear_from_normalised([0.83137256, 0.12941177, 0.23921569])
-/// );
-/// ```
-#[inline]
-pub fn normalised_from_linear(linear: [f32; 3]) -> [f32; 3] {
-    arr_map(linear, gamma::compress_normalised)
-}
-
-
-
-#[inline]
-fn arr_map<F: Copy, T: Copy, Fun: Fn(F) -> T>(arr: [F; 3], f: Fun) -> [T; 3] {
+pub(crate) fn arr_map<F: Copy, T: Copy, Fun: Fn(F) -> T>(
+    arr: [F; 3],
+    f: Fun,
+) -> [T; 3] {
     [f(arr[0]), f(arr[1]), f(arr[2])]
 }

@@ -132,6 +132,98 @@ pub fn compress_normalised(s: f32) -> f32 {
 }
 
 
+/// Converts a 24-bit sRGB colour (also known as true colour) into linear space.
+/// That is, performs gamma expansion on each component and returns the colour
+/// in linear sRGB space with each component normalised to the range 0–1.
+///
+/// This is just a convenience wrapper around [`expand_u8()`] function.
+///
+/// # Example
+/// ```
+/// assert_eq!(
+///     [0.8148465, 0.80695224, 0.7991027],
+///     srgb::gamma::linear_from_u8([233, 232, 231])
+/// );
+/// assert_eq!(
+///     [0.6583748, 0.015208514, 0.046665084],
+///     srgb::gamma::linear_from_u8([212, 33, 61])
+/// );
+/// ```
+#[inline]
+pub fn linear_from_u8(encoded: [u8; 3]) -> [f32; 3] {
+    super::arr_map(encoded, expand_u8)
+}
+
+/// Converts an sRGB colour in linear space to a 24-bit sRGB colour (also known
+/// as true colour).  That is, performs gamma compression on each component and
+/// encodes each component as an 8-bit integer.
+///
+/// This is just a convenience wrapper around [`compress_u8()`] function.
+///
+/// # Example
+/// ```
+/// assert_eq!(
+///     [233, 232, 231],
+///     srgb::gamma::u8_from_linear([0.8148465, 0.80695224, 0.7991027])
+/// );
+/// assert_eq!(
+///     [212, 33, 61],
+///     srgb::gamma::u8_from_linear([0.6583748, 0.015208514, 0.046665084])
+/// );
+/// ```
+#[inline]
+pub fn u8_from_linear(linear: [f32; 3]) -> [u8; 3] {
+    super::arr_map(linear, compress_u8)
+}
+
+
+/// Converts an sRGB colour in normalised representation into linear space.
+/// That is, performs gamma expansion on each component (which should be in 0–1
+/// range) and returns the colour in linear space.
+///
+/// This is just a convenience wrapper around [`expand_normalised()`]
+/// function.
+///
+/// # Example
+/// ```
+/// assert_eq!(
+///     [0.8148467, 0.80695236, 0.79910284],
+///     srgb::gamma::linear_from_normalised([0.9137255, 0.9098039, 0.90588236])
+/// );
+/// assert_eq!(
+///     [0.65837485, 0.015208514, 0.046665095],
+///     srgb::gamma::linear_from_normalised([0.83137256, 0.12941177, 0.2392157])
+/// );
+/// ```
+#[inline]
+pub fn linear_from_normalised(normalised: [f32; 3]) -> [f32; 3] {
+    super::arr_map(normalised, expand_normalised)
+}
+
+/// Converts an sRGB colour in linear space to normalised space.  That is,
+/// performs gamma compression on each component (which should be in 0–1 range)
+/// and encodes each component as an 8-bit integer.
+///
+/// This is just a convenience wrapper around [`compress_normalised()`]
+/// function.
+///
+/// # Example
+/// ```
+/// assert_eq!(
+///     [0.9137255, 0.9098039, 0.90588236],
+///     srgb::gamma::normalised_from_linear([0.8148467, 0.80695236, 0.79910284])
+/// );
+/// assert_eq!(
+///     [0.83137256, 0.1294117, 0.23921564],
+///     srgb::gamma::normalised_from_linear([0.65837485, 0.0152085, 0.04666508])
+/// );
+/// ```
+#[inline]
+pub fn normalised_from_linear(linear: [f32; 3]) -> [f32; 3] {
+    super::arr_map(linear, compress_normalised)
+}
+
+
 #[cfg(test)]
 mod test {
     use approx::assert_ulps_eq;
