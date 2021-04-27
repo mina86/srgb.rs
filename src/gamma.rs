@@ -16,23 +16,21 @@ const E_0: f32 = 12.92 * S_0;
 /// # Example
 ///
 /// ```
-/// use srgb::gamma::expand_u8;
-///
-/// let white = [expand_u8(233), expand_u8(232), expand_u8(231)];
-/// assert_eq!([0.8148465, 0.80695224, 0.7991027], white);
-///
-/// let red = [expand_u8(212), expand_u8(33), expand_u8(61)];
-/// assert_eq!([0.6583748, 0.015208514, 0.046665084], red);
+/// assert_eq!(0.0,          srgb::gamma::expand_u8(  0));
+/// assert_eq!(0.0015176348, srgb::gamma::expand_u8(  5));
+/// assert_eq!(0.046665084,  srgb::gamma::expand_u8( 61));
+/// assert_eq!(0.8148465,    srgb::gamma::expand_u8(233));
+/// assert_eq!(1.0,          srgb::gamma::expand_u8(255));
 /// ```
 #[inline]
 pub fn expand_u8(e: u8) -> f32 {
-    if e > (E_0 * 255.0) as u8 {
+    if e <= (E_0 * 255.0) as u8 {
+        const D: f32 = 12.92 * 255.0;
+        e as f32 / D
+    } else {
         const A: f32 = 0.055 * 255.0;
         const D: f32 = 1.055 * 255.0;
         ((e as f32 + A) / D).powf(2.4)
-    } else {
-        const D: f32 = 12.92 * 255.0;
-        e as f32 / D
     }
 }
 
@@ -49,29 +47,23 @@ pub fn expand_u8(e: u8) -> f32 {
 /// # Example
 ///
 /// ```
-/// use srgb::gamma::compress_u8;
-///
-/// let white = [0.8148465, 0.80695224, 0.7991027];
-/// let white =
-///     [compress_u8(white[0]), compress_u8(white[1]), compress_u8(white[2])];
-/// assert_eq!([233, 232, 231], white);
-///
-/// let red = [0.6583748, 0.015208514, 0.046665084];
-/// let red = [compress_u8(red[0]), compress_u8(red[1]), compress_u8(red[2])];
-/// assert_eq!([212, 33, 61], red);
+/// assert_eq!(  0, srgb::gamma::compress_u8(0.0));
+/// assert_eq!(  5, srgb::gamma::compress_u8(0.0015176348));
+/// assert_eq!( 61, srgb::gamma::compress_u8(0.046665084));
+/// assert_eq!(233, srgb::gamma::compress_u8(0.8148465));
+/// assert_eq!(255, srgb::gamma::compress_u8(1.0));
 /// ```
 #[inline]
 pub fn compress_u8(s: f32) -> u8 {
-    let e = if s > S_0 {
+    // Adding 0.5 is for rounding.
+    (if s <= S_0 {
+        const D: f32 = 12.92 * 255.0;
+        s.max(0.0).mul_add(D, 0.5)
+    } else {
         const A: f32 = 0.055 * 255.0;
         const D: f32 = 1.055 * 255.0;
-        crate::maths::mul_add(D, s.powf(1.0 / 2.4), -A)
-    } else {
-        const D: f32 = 12.92 * 255.0;
-        D * s
-    };
-    // Adding 0.5 is for rounding.
-    (e.clamp(0.0, 255.0) + 0.5) as u8
+        crate::maths::mul_add(D, s.min(1.0).powf(1.0 / 2.4), -A + 0.5)
+    }) as u8
 }
 
 
@@ -87,22 +79,17 @@ pub fn compress_u8(s: f32) -> u8 {
 /// # Example
 ///
 /// ```
-/// use srgb::gamma::expand_normalised;
-///
-/// let mut white = [0.91372544, 0.90980387, 0.9058823];
-/// white.iter_mut().for_each(|c| *c = expand_normalised(*c));
-/// assert_eq!([0.8148465, 0.80695224, 0.7991027], white);
-///
-/// let mut red = [0.8313725, 0.12941176, 0.23921567];
-/// red.iter_mut().for_each(|c| *c = expand_normalised(*c));
-/// assert_eq!([0.6583748, 0.015208514, 0.046665084], red);
+/// assert_eq!(0.0,         srgb::gamma::expand_normalised(0.0));
+/// assert_eq!(0.046665084, srgb::gamma::expand_normalised(0.23921567));
+/// assert_eq!(0.8148465,   srgb::gamma::expand_normalised(0.91372544));
+/// assert_eq!(1.0,         srgb::gamma::expand_normalised(1.0));
 /// ```
 #[inline]
 pub fn expand_normalised(e: f32) -> f32 {
-    if e > E_0 {
-        ((e as f32 + 0.055) / 1.055).powf(2.4)
-    } else {
+    if e <= E_0 {
         e / 12.92
+    } else {
+        ((e as f32 + 0.055) / 1.055).powf(2.4)
     }
 }
 
@@ -118,22 +105,18 @@ pub fn expand_normalised(e: f32) -> f32 {
 /// # Example
 ///
 /// ```
-/// use srgb::gamma::compress_normalised;
-///
-/// let mut white = [0.8148465, 0.80695224, 0.7991027];
-/// white.iter_mut().for_each(|c: &mut f32| *c = compress_normalised(*c));
-/// assert_eq!([0.91372544, 0.90980387, 0.9058823], white);
-///
-/// let mut red = [0.6583748, 0.015208514, 0.046665084];
-/// red.iter_mut().for_each(|c| *c = compress_normalised(*c));
-/// assert_eq!([0.8313725, 0.12941176, 0.23921567], red);
+/// assert_eq!(0.0,        srgb::gamma::compress_normalised(0.0));
+/// assert_eq!(0.23921567, srgb::gamma::compress_normalised(0.046665084));
+/// assert_eq!(0.91372544, srgb::gamma::compress_normalised(0.8148465));
+/// // Unfortunately, imprecision of floating point numbers may be an issue:
+/// assert_eq!(0.99999994, srgb::gamma::compress_normalised(1.0));
 /// ```
 #[inline]
 pub fn compress_normalised(s: f32) -> f32 {
-    if s > S_0 {
-        crate::maths::mul_add(1.055, s.powf(1.0 / 2.4), -0.055)
-    } else {
+    if s <= S_0 {
         12.92 * s
+    } else {
+        crate::maths::mul_add(1.055, s.powf(1.0 / 2.4), -0.055)
     }
 }
 
