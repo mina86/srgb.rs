@@ -1,4 +1,5 @@
 //! The crate provides primitives for manipulating colours in sRGB colour space.
+//!
 //! Specifically, it provides functions for converting between sRGB space,
 //! linear sRGB space and XYZ colour space; as well as exposes the definition of
 //! D65 reference white point as well as XYZ colour conversion matrices.
@@ -24,9 +25,10 @@ mod maths;
 
 
 /// Converts a 24-bit sRGB colour (also known as true colour) into normalised
-/// representation.  Returns three components each normalised to the range 0–1.
+/// representation.
 ///
-/// This does exactly what one might expect: divides each component by 255.
+/// Returns three components each normalised to the range 0–1.  This does
+/// exactly what one might expect: divides each component by 255.
 ///
 /// # Example
 /// ```
@@ -46,12 +48,12 @@ pub fn normalised_from_u8(encoded: [u8; 3]) -> [f32; 3] {
 }
 
 /// Converts an sRGB colour in normalised representation into a 24-bit (also
-/// known as true colour).  That is, converts sRGB representation where each
-/// component is a number in the range from zero to one to one where each
-/// component is an 8-bit unsigned integer.  Components in source colour are
-/// clamped to the valid range.
+/// known as true colour).
 ///
-/// This is morally equivalent to multiplying each component by 255.
+/// That is, converts sRGB representation where each component is a number in
+/// the range from zero to one to one where each component is an 8-bit unsigned
+/// integer.  Components in source colour are clamped to the valid range.  This
+/// is roughly equivalent to multiplying each component by 255.
 ///
 /// # Example
 /// ```

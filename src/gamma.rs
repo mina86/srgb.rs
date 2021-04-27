@@ -3,8 +3,9 @@
 const S_0: f32 = 0.00313066844250060782371;
 const E_0: f32 = 12.92 * S_0;
 
-/// Performs an sRGB gamma expansion on specified 8-bit component value.  In
-/// other words, converts an 8-bit sRGB component value into a linear sRGB
+/// Performs an sRGB gamma expansion on specified 8-bit component value.
+///
+/// In other words, converts an 8-bit sRGB component value into a linear sRGB
 /// value.  The argument must be in the range 0–255.  The result will be in the
 /// range from zero to one.
 ///
@@ -35,10 +36,11 @@ pub fn expand_u8(e: u8) -> f32 {
     }
 }
 
-/// Performs an sRGB gamma compression on specified linear component value.  In
-/// other words, converts a linear sRGB component into an 8-bit sRGB value.  The
-/// argument must be in the range from zero to one.  The result will be in the
-/// range 0–255 range.
+/// Performs an sRGB gamma compression on specified linear component value.
+///
+/// In other words, converts a linear sRGB component into an 8-bit sRGB value.
+/// The argument must be in the range from zero to one.  The result will be in
+/// the range 0–255 range.
 ///
 /// This function is faster (and slightly more accurate as it performs fewer
 /// floating point operations) than first compressing into a normalised value
@@ -74,6 +76,7 @@ pub fn compress_u8(s: f32) -> u8 {
 
 
 /// Performs an sRGB gamma expansion on specified normalised component value.
+///
 /// In other words, converts a normalised sRGB component value into a linear
 /// sRGB value.  The argument must be in the range from zero to one.  The result
 /// will be in the same range.
@@ -103,10 +106,11 @@ pub fn expand_normalised(e: f32) -> f32 {
     }
 }
 
-/// Performs an sRGB gamma compression on specified linear component value.  In
-/// other words, converts a linear sRGB component into a normalised sRGB value.
-/// The argument must be in the range from zero to one.  The result will be in
-/// the same range.
+/// Performs an sRGB gamma compression on specified linear component value.
+///
+/// In other words, converts a linear sRGB component into a normalised sRGB
+/// value.  The argument must be in the range from zero to one.  The result will
+/// be in the same range.
 ///
 /// Prefer [`compress_u8()`] if you’re intending to end up with an 8-bit colour
 /// in 0–255 range.
@@ -135,6 +139,7 @@ pub fn compress_normalised(s: f32) -> f32 {
 
 
 /// Converts a 24-bit sRGB colour (also known as true colour) into linear space.
+///
 /// That is, performs gamma expansion on each component and returns the colour
 /// in linear sRGB space with each component normalised to the range 0–1.
 ///
@@ -157,8 +162,10 @@ pub fn linear_from_u8(encoded: [u8; 3]) -> [f32; 3] {
 }
 
 /// Converts an sRGB colour in linear space to a 24-bit sRGB colour (also known
-/// as true colour).  That is, performs gamma compression on each component and
-/// encodes each component as an 8-bit integer.
+/// as true colour).
+///
+/// That is, performs gamma compression on each component and encodes each
+/// component as an 8-bit integer.
 ///
 /// This is just a convenience wrapper around [`compress_u8()`] function.
 ///
@@ -180,6 +187,7 @@ pub fn u8_from_linear(linear: [f32; 3]) -> [u8; 3] {
 
 
 /// Converts an sRGB colour in normalised representation into linear space.
+///
 /// That is, performs gamma expansion on each component (which should be in 0–1
 /// range) and returns the colour in linear space.
 ///
@@ -202,9 +210,10 @@ pub fn linear_from_normalised(normalised: [f32; 3]) -> [f32; 3] {
     super::arr_map(normalised, expand_normalised)
 }
 
-/// Converts an sRGB colour in linear space to normalised space.  That is,
-/// performs gamma compression on each component (which should be in 0–1 range)
-/// and encodes each component as an 8-bit integer.
+/// Converts an sRGB colour in linear space to normalised space.
+///
+/// That is, performs gamma compression on each component (which should be in
+/// 0–1 range) and encodes each component as an 8-bit integer.
 ///
 /// This is just a convenience wrapper around [`compress_normalised()`]
 /// function.

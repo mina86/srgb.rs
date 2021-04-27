@@ -1,9 +1,10 @@
 //! Functions and constant handling and related to conversion between linear
 //! sRGB space and CIE XYZ colour space.
 
-/// Converts a colour in linear sRGB space into an XYZ colour space.  The colour
-/// is given as three components each in the range from zero to one.  Resulting
-/// XYZ space is one where white colour has Y coordinate equal one.
+/// Converts a colour in linear sRGB space into an XYZ colour space.
+///
+/// The colour is given as three components each in the range from zero to one.
+/// Resulting XYZ space is one where white colour has Y coordinate equal one.
 ///
 /// # Example
 /// ```
@@ -19,10 +20,11 @@ pub fn xyz_from_linear(linear: [f32; 3]) -> [f32; 3] {
     matrix_product(&XYZ_FROM_SRGB_MATRIX, linear)
 }
 
-/// Converts a colour in an XYZ space into a linear sRGB colour space.  The
-/// colour is given as three floating point components.  The source XYZ space
-/// should be such where white colour has Y coordinate equal one.  The result
-/// will be given as a three numbers in the range from zero to one.
+/// Converts a colour in an XYZ space into a linear sRGB colour space.
+///
+/// The colour is given as three floating point components.  The source XYZ
+/// space should be such where white colour has Y coordinate equal one.  The
+/// result will be given as a three numbers in the range from zero to one.
 ///
 /// # Example
 /// ```

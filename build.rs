@@ -100,7 +100,9 @@ pub const PRIMARIES_xyY: [[f32; 3]; 3] = {primaries_xyY};
 pub const PRIMARIES_XYZ: [[f32; 3]; 3] = {primaries_XYZ};
 
 /// The basis conversion matrix for moving from linear sRGB space to XYZ colour
-/// space.  To perform the conversion it’s typically more convenient to use the
+/// space.
+///
+/// To perform the conversion it’s typically more convenient to use the
 /// xyz_from_linear() function instead of accessing this constant.
 ///
 /// The matrix is built with the assumption that colours are represented as
@@ -109,7 +111,9 @@ pub const PRIMARIES_XYZ: [[f32; 3]; 3] = {primaries_XYZ};
 pub const XYZ_FROM_SRGB_MATRIX: [[f32; 3]; 3] = {matrix};
 
 /// The basis conversion matrix for moving from XYZ to linear sRGB colour
-/// space.  To perform the conversion it’s typically more convenient to use the
+/// space.
+///
+/// To perform the conversion it’s typically more convenient to use the
 /// linear_from_xyz() function instead of accessing this constant.
 ///
 /// The matrix is built with the assumption that colours are represented as
