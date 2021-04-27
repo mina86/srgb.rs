@@ -1,5 +1,8 @@
 //! Functions implementing sRGB gamma compression and expansion formulæ.
 
+const S_0: f32 = 0.00313066844250060782371;
+const E_0: f32 = 12.92 * S_0;
+
 /// Performs an sRGB gamma expansion on specified 8-bit component value.  In
 /// other words, converts an 8-bit sRGB component value into a linear sRGB
 /// value.  The argument must be in the range 0–255.  The result will be in the
@@ -22,7 +25,7 @@
 /// ```
 #[inline]
 pub fn expand_u8(e: u8) -> f32 {
-    if e > 10 {
+    if e > (E_0 * 255.0) as u8 {
         const A: f32 = 0.055 * 255.0;
         const D: f32 = 1.055 * 255.0;
         ((e as f32 + A) / D).powf(2.4)
@@ -57,7 +60,7 @@ pub fn expand_u8(e: u8) -> f32 {
 /// ```
 #[inline]
 pub fn compress_u8(s: f32) -> u8 {
-    let e = if s > 0.0031308 {
+    let e = if s > S_0 {
         const A: f32 = 0.055 * 255.0;
         const D: f32 = 1.055 * 255.0;
         crate::maths::mul_add(D, s.powf(1.0 / 2.4), -A)
@@ -93,7 +96,6 @@ pub fn compress_u8(s: f32) -> u8 {
 /// ```
 #[inline]
 pub fn expand_normalised(e: f32) -> f32 {
-    const E_0: f32 = 12.92 * 0.00313066844250060782371;
     if e > E_0 {
         ((e as f32 + 0.055) / 1.055).powf(2.4)
     } else {
@@ -124,7 +126,7 @@ pub fn expand_normalised(e: f32) -> f32 {
 /// ```
 #[inline]
 pub fn compress_normalised(s: f32) -> f32 {
-    if s > 0.0031308 {
+    if s > S_0 {
         crate::maths::mul_add(1.055, s.powf(1.0 / 2.4), -0.055)
     } else {
         12.92 * s
