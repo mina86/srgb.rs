@@ -1,7 +1,7 @@
 [package]
 name          = "srgb"
 description   = "sRGB primitives and constants — lightweight crate with functions and constants needed when manipulating sRGB colours"
-version       = "0.1.2"
+version       = "0.1.3"
 readme        = "README.md"
 keywords      = ["srgb", "xyz", "color", "rgb"]
 authors       = ["Michal Nazarewicz <mina86@mina86.com>"]

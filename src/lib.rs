@@ -2,7 +2,10 @@
 //!
 //! Specifically, it provides functions for converting between sRGB space,
 //! linear sRGB space and XYZ colour space; as well as exposes the definition of
-//! D65 reference white point as well as XYZ colour conversion matrices.
+//! D65 reference white point as well as XYZ colour conversion matrices; and in
+//! addition provides functions for handling
+//! [Rec.709](https://www.itu.int/rec/R-REC-BT.709-6-201506-I/en) components
+//! encoding.
 //!
 //! The crate intents to provide low-level primitives needed to work with sRGB
 //! colour space.  Those primitives can be used by other libraries which need to
@@ -19,6 +22,7 @@
 //! by those functions.
 
 pub mod gamma;
+pub mod rec709;
 pub mod xyz;
 
 mod maths;

@@ -1,8 +1,10 @@
 # sRGB primitives and constants
 
 A lightweight crate providing functions and constants used in sRGB
-colour space.  Specifically gamma correction, D65 definition and XYZ
-conversion functions and constants.
+colour space.  Specifically gamma correction, D65 definition, XYZ
+conversion functions and constants and
+[Rec.709](https://www.itu.int/rec/R-REC-BT.709-6-201506-I/en) encoding
+and decoding routines.
 
 The crate intents to provide low-level primitives needed to work with sRGB
 colour space.  Those primitives can be used by other libraries which need to

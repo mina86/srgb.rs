@@ -3,6 +3,41 @@
 const S_0: f32 = 0.00313066844250060782371;
 const E_0: f32 = 12.92 * S_0;
 
+macro_rules! expand_impl {
+    ($e:ident, $t:ty, $low:expr, $high:expr) => {{
+        const FULL_RANGE: bool = $low == <$t>::MIN && $high == <$t>::MAX;
+        const RANGE: f32 = ($high - $low) as f32;
+        const THRESHOLD: $t = (E_0 * RANGE) as $t + $low;
+        if !FULL_RANGE && $e <= $low {
+            0.0
+        } else if $e <= THRESHOLD {
+            const D: f32 = 12.92 * RANGE;
+            ($e - $low) as f32 / D
+        } else if FULL_RANGE || $e < $high {
+            const A: f32 = 0.055 * RANGE;
+            const D: f32 = 1.055 * RANGE;
+            ((($e - $low) as f32 + A) / D).powf(2.4)
+        } else {
+            1.0
+        }
+    }}
+}
+
+macro_rules! compress_impl {
+    ($s:ident, $t:ty, $low:expr, $high:expr) => {{
+        const RANGE: f32 = ($high - $low) as f32;
+        // Adding 0.5 is for rounding.
+        (if $s <= S_0 {
+            const D: f32 = 12.92 * RANGE;
+            $s.max(0.0).mul_add(D, 0.5)
+        } else {
+            const A: f32 = 0.055 * RANGE;
+            const D: f32 = 1.055 * RANGE;
+            crate::maths::mul_add(D, $s.powf(1.0 / 2.4), -A + 0.5)
+        }) as $t + $low
+    }}
+}
+
 /// Performs an sRGB gamma expansion on specified 8-bit component value.
 ///
 /// In other words, converts an 8-bit sRGB component value into a linear sRGB
@@ -24,14 +59,7 @@ const E_0: f32 = 12.92 * S_0;
 /// ```
 #[inline]
 pub fn expand_u8(e: u8) -> f32 {
-    if e <= (E_0 * 255.0) as u8 {
-        const D: f32 = 12.92 * 255.0;
-        e as f32 / D
-    } else {
-        const A: f32 = 0.055 * 255.0;
-        const D: f32 = 1.055 * 255.0;
-        ((e as f32 + A) / D).powf(2.4)
-    }
+    expand_impl!(e, u8, u8::MIN, u8::MAX)
 }
 
 /// Performs an sRGB gamma compression on specified linear component value.
@@ -55,15 +83,104 @@ pub fn expand_u8(e: u8) -> f32 {
 /// ```
 #[inline]
 pub fn compress_u8(s: f32) -> u8 {
-    // Adding 0.5 is for rounding.
-    (if s <= S_0 {
-        const D: f32 = 12.92 * 255.0;
-        s.max(0.0).mul_add(D, 0.5)
-    } else {
-        const A: f32 = 0.055 * 255.0;
-        const D: f32 = 1.055 * 255.0;
-        crate::maths::mul_add(D, s.min(1.0).powf(1.0 / 2.4), -A + 0.5)
-    }) as u8
+    compress_impl!(s, u8, u8::MIN, u8::MAX)
+}
+
+
+/// Performs an sRGB gamma expansion on specified component value whose range is
+/// [16, 235].
+///
+/// The value is clamped to the expected range.  The range corresponds to 8-bit
+/// coding in Rec.709 standard.
+///
+/// # Example
+///
+/// ```
+/// assert_eq!(0.0,          srgb::gamma::expand_rec709_8bit(  0));
+/// assert_eq!(0.0,          srgb::gamma::expand_rec709_8bit( 16));
+/// assert_eq!(0.0007068437, srgb::gamma::expand_rec709_8bit( 18));
+/// assert_eq!(0.94884676,   srgb::gamma::expand_rec709_8bit(230));
+/// assert_eq!(1.0,          srgb::gamma::expand_rec709_8bit(235));
+/// assert_eq!(1.0,          srgb::gamma::expand_rec709_8bit(255));
+///
+/// let norm = srgb::rec709::decode_rec709_8bit(126);
+/// assert_eq!(0.21616048, srgb::gamma::expand_rec709_8bit(126));
+/// assert_eq!(0.21616042, srgb::gamma::expand_normalised(norm));
+/// ```
+#[inline]
+pub fn expand_rec709_8bit(e: u8) -> f32 {
+    expand_impl!(e, u8, 16, 235)
+}
+
+/// Performs an sRGB gamma compression on specified linear component and encodes
+/// result as an integer in the [16, 235] range.
+///
+/// The value is clamped to the [0.0, 1.0] range.  The range of the result
+/// corresponds to 8-bit coding in Rec.709 standard.
+///
+/// # Example
+///
+/// ```
+/// assert_eq!( 16, srgb::gamma::compress_rec709_8bit(0.0));
+/// assert_eq!( 18, srgb::gamma::compress_rec709_8bit(0.0007));
+/// assert_eq!(230, srgb::gamma::compress_rec709_8bit(0.9488));
+/// assert_eq!(235, srgb::gamma::compress_rec709_8bit(1.0));
+///
+/// assert_eq!(126, srgb::gamma::compress_rec709_8bit(0.21616048));
+/// let norm = srgb::rec709::decode_rec709_8bit(126);
+/// assert_eq!(0.21616042, srgb::gamma::expand_normalised(norm));
+/// ```
+#[inline]
+pub fn compress_rec709_8bit(s: f32) -> u8 {
+    compress_impl!(s, u8, 16, 235)
+}
+
+/// Performs an sRGB gamma expansion on specified component value whose range is
+/// [64, 940].
+///
+/// The value is clamped to the expected range.  The range corresponds to 10-bit
+/// coding in Rec.709 standard.
+///
+/// # Example
+///
+/// ```
+/// assert_eq!(0.0,           srgb::gamma::expand_rec709_10bit(   0));
+/// assert_eq!(0.0,           srgb::gamma::expand_rec709_10bit(  64));
+/// assert_eq!(0.00053013273, srgb::gamma::expand_rec709_10bit(  70));
+/// assert_eq!(0.67418975,    srgb::gamma::expand_rec709_10bit( 800));
+/// assert_eq!(1.0,           srgb::gamma::expand_rec709_10bit( 940));
+/// assert_eq!(1.0,           srgb::gamma::expand_rec709_10bit(1023));
+///
+/// let norm = srgb::rec709::decode_rec709_10bit(507);
+/// assert_eq!(0.21936223, srgb::gamma::expand_rec709_10bit(507));
+/// assert_eq!(0.21936223, srgb::gamma::expand_normalised(norm));
+/// ```
+#[inline]
+pub fn expand_rec709_10bit(e: u16) -> f32 {
+    expand_impl!(e, u16, 64, 940)
+}
+
+/// Performs an sRGB gamma compression on specified linear component and encodes
+/// result as an integer in the [64, 940] range.
+///
+/// The value is clamped to the [0.0, 1.0] range.  The range of the result
+/// corresponds to 10-bit coding in Rec.709 standard.
+///
+/// # Example
+///
+/// ```
+/// assert_eq!(  64, srgb::gamma::compress_rec709_10bit(0.0));
+/// assert_eq!(  70, srgb::gamma::compress_rec709_10bit(0.000530));
+/// assert_eq!( 800, srgb::gamma::compress_rec709_10bit(0.674189));
+/// assert_eq!( 940, srgb::gamma::compress_rec709_10bit(1.0));
+///
+/// assert_eq!(504, srgb::gamma::compress_rec709_10bit(0.21616048));
+/// let norm = srgb::rec709::decode_rec709_10bit(504);
+/// assert_eq!(0.21616042, srgb::gamma::expand_normalised(norm));
+/// ```
+#[inline]
+pub fn compress_rec709_10bit(s: f32) -> u16 {
+    compress_impl!(s, u16, 64, 940)
 }
 
 
