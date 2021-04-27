@@ -13,7 +13,16 @@ edition       = "2018"
 [dev-dependencies]
 approx = "0.4"
 delta_e = "^0.2"
+criterion = { version = "0.3.3", default-features = false }
 
 [build-dependencies]
 rgb_derivation = "0.1"
 num = "0.4"
+
+[[bench]]
+name = "xyz"
+harness = false
+
+[[bench]]
+name = "gamma"
+harness = false

@@ -1,7 +1,7 @@
 use std::io::Write;
 
-use num::Zero;
 use num::One;
+use num::Zero;
 
 type Scalar = num::BigRational;
 type Chromacity = rgb_derivation::Chromacity<Scalar>;
@@ -23,7 +23,11 @@ fn fmt_scalar(scalar: &Scalar) -> std::string::String {
     if numer.is_zero() || denom.is_one() {
         format!("{}.0", scalar.denom().to_str_radix(10))
     } else {
-        format!("{}.0 / {}.0", numer.to_str_radix(10), denom.to_str_radix(10))
+        format!(
+            "{}.0 / {}.0",
+            numer.to_str_radix(10),
+            denom.to_str_radix(10)
+        )
     }
 }
 
@@ -70,7 +74,8 @@ fn generate() -> std::io::Result<()> {
     ];
 
     let white_xyz = white_xy.to_xyz();
-    let matrix = rgb_derivation::matrix::calculate(&white_xyz, &primaries_xy).unwrap();
+    let matrix =
+        rgb_derivation::matrix::calculate(&white_xyz, &primaries_xy).unwrap();
     let inverse = rgb_derivation::matrix::inversed_copy(&matrix).unwrap();
     let primaries_xyz = rgb_derivation::matrix::transposed_copy(&matrix);
 
