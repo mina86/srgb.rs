@@ -79,6 +79,8 @@ fn generate() -> std::io::Result<()> {
     let inverse = rgb_derivation::matrix::inversed_copy(&matrix).unwrap();
     let primaries_xyz = rgb_derivation::matrix::transposed_copy(&matrix);
 
+    let white_uv = white_xy.to_uv();
+
     let mut dest = std::fs::File::create(dest_path)?;
 
     writeln!(
@@ -91,6 +93,10 @@ pub const D65_xyY: [f32; 3] = {white_xyY};
 
 /// XYZ coordinates of the D65 reference white-point used in sRGB colour space.
 pub const D65_XYZ: [f32; 3] = {white_XYZ};
+
+/// D65 reference white point’s chromacity expressed as (u′, v′) coordinates.
+#[allow(non_upper_case_globals)]
+pub const D65_uv: [f32; 2] = [{white_u}, {white_v}];
 
 /// xyY coordinates of red, green and blue primaries defining the sRGB space.
 #[allow(non_upper_case_globals)]
@@ -123,6 +129,8 @@ pub const SRGB_FROM_XYZ_MATRIX: [[f32; 3]; 3] = {inverse};
 "#,
         white_xyY = fmt_chromacity(&white_xy),
         white_XYZ = fmt_vector(&white_xyz),
+        white_u = fmt_scalar(&white_uv.0),
+        white_v = fmt_scalar(&white_uv.1),
         primaries_xyY = fmt_matrix(&primaries_xy, fmt_chromacity),
         primaries_XYZ = fmt_matrix(&primaries_xyz, fmt_vector),
         matrix = fmt_matrix(&matrix, fmt_vector),
