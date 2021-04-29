@@ -1,7 +1,7 @@
 //! Functions implementing sRGB gamma compression and expansion formulæ.
 
-const S_0: f32 = 0.00313066844250060782371;
-const E_0: f32 = 12.92 * S_0;
+// Defines S_0 and E_0 constants
+include!(concat!(env!("OUT_DIR"), "/gamma_constants.rs"));
 
 macro_rules! expand_impl {
     ($e:ident, $t:ty, $low:expr, $high:expr) => {{
