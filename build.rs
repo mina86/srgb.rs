@@ -21,7 +21,7 @@ fn chromacity(x: (i64, i64), y: (i64, i64)) -> Chromacity {
 fn fmt_scalar(scalar: &Scalar) -> std::string::String {
     let (numer, denom) = (scalar.numer(), scalar.denom());
     if numer.is_zero() || denom.is_one() {
-        format!("{}.0", scalar.denom().to_str_radix(10))
+        format!("{}.0", numer.to_str_radix(10))
     } else {
         format!(
             "{}.0 / {}.0",
