@@ -1,3 +1,6 @@
+#[cfg(all(feature = "no-fma", feature = "prefer-fma"))]
+compile_error!("no-fma and prefer-fma features cannot both be enabled");
+
 #[inline(always)]
 pub(crate) fn mul_add(a: f32, b: f32, c: f32) -> f32 {
     if cfg!(feature = "no-fma") {
@@ -11,8 +14,7 @@ pub(crate) fn mul_add(a: f32, b: f32, c: f32) -> f32 {
 #[inline]
 #[allow(dead_code)]
 fn dot_product_fallback(a: &[f32; 3], b: &[f32; 3]) -> f32 {
-    panic!("AAA");
-//    a[2].mul_add(b[2], a[1].mul_add(b[1], a[0] * b[0]))
+    a[2].mul_add(b[2], a[1].mul_add(b[1], a[0] * b[0]))
 }
 
 
@@ -87,7 +89,7 @@ pub(crate) fn matrix_product(
     column: [f32; 3],
 ) -> [f32; 3] {
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    if sse::has_sse() {
+    if !cfg!(feature = "prefer-fma") && sse::has_sse() {
         return if sse::has_sse4_1() {
             // SAFETY: We check whether CPU supports SSE 4.1.
             unsafe {

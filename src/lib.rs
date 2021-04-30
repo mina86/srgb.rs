@@ -23,7 +23,7 @@
 //!
 //! # Features
 //!
-//! The crate defines one optional feature:
+//! The crate defines two optional features:
 //!
 //! ### `no-fma`
 //!
@@ -41,7 +41,19 @@
 //! Note that even if this feature is not enabled, that does not mean fused
 //! multiply-add instruction will be used.  Depending on processor the crate is
 //! built for, the code may choose a faster implementation of matrix
-//! multiplication which does not use fused multiply-add operation.
+//! multiplication which does not use fused multiply-add operation.  To make
+//! that happen, enable `prefer-fma`.
+//!
+//! ### `prefer-fma`
+//!
+//! When enabled, the code will use [a fused multiply-add
+//! operation](https://doc.rust-lang.org/std/primitive.f32.html#method.mul_add)
+//! whenever possible.  This will disable some potential performance
+//! optimisations which use SIMD instructions in favour of using fused
+//! multiply-add operation.  See notes about `no-fma` above for discussion of
+//! how FMA impacts precision of the calculations.
+//!
+//! Note that `no-fma` and `prefer-fma` are mutually exclusive
 
 pub mod gamma;
 pub mod rec709;
