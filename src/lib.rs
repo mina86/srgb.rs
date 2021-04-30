@@ -96,9 +96,7 @@ pub fn normalised_from_u8(encoded: [u8; 3]) -> [f32; 3] {
 #[doc(hidden)]
 pub fn u8_from_normalised(normalised: [f32; 3]) -> [u8; 3] {
     // Adding 0.5 is for rounding.
-    arr_map(normalised, |v| {
-        maths::mul_add(v.clamp(0.0, 1.0), 255.0, 0.5) as u8
-    })
+    arr_map(normalised, |v| v.clamp(0.0, 1.0).mul_add(255.0, 0.5) as u8)
 }
 
 

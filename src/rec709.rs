@@ -47,11 +47,11 @@ pub fn decode_rec709_10bit(value: u16) -> f32 {
 /// Converts normalised value into 8-bit Rec.709 coding.
 #[inline(always)]
 pub fn encode_rec709_8bit(value: f32) -> u8 {
-    super::maths::mul_add(value.clamp(0.0, 1.0), (235 - 16) as f32, 16.5) as u8
+    value.clamp(0.0, 1.0).mul_add((235 - 16) as f32, 16.5) as u8
 }
 
 /// Converts normalised value into 10-bit Rec.709 coding.
 #[inline(always)]
 pub fn encode_rec709_10bit(value: f32) -> u16 {
-    super::maths::mul_add(value.clamp(0.0, 1.0), (940 - 64) as f32, 64.5) as u16
+    value.clamp(0.0, 1.0).mul_add((940 - 64) as f32, 64.5) as u16
 }

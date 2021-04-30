@@ -17,7 +17,7 @@
 /// assert_eq!([0.2990163, 0.16, 0.0655738], xyz_from_linear(red));
 /// ```
 pub fn xyz_from_linear(linear: [f32; 3]) -> [f32; 3] {
-    matrix_product(&XYZ_FROM_SRGB_MATRIX, linear)
+    crate::maths::matrix_product(&XYZ_FROM_SRGB_MATRIX, linear)
 }
 
 /// Converts a colour in an XYZ space into a linear sRGB colour space.
@@ -37,22 +37,11 @@ pub fn xyz_from_linear(linear: [f32; 3]) -> [f32; 3] {
 /// assert_eq!([0.69039214, 0.013060069, 0.053315595], linear_from_xyz(red));
 /// ```
 pub fn linear_from_xyz(xyz: [f32; 3]) -> [f32; 3] {
-    matrix_product(&SRGB_FROM_XYZ_MATRIX, xyz.into())
+    crate::maths::matrix_product(&SRGB_FROM_XYZ_MATRIX, xyz.into())
 }
 
 
 include!(concat!(env!("OUT_DIR"), "/xyz_constants.rs"));
-
-
-#[inline(always)]
-fn matrix_product(matrix: &[[f32; 3]; 3], column: [f32; 3]) -> [f32; 3] {
-    [
-        crate::maths::dot_product(&matrix[0], &column),
-        crate::maths::dot_product(&matrix[1], &column),
-        crate::maths::dot_product(&matrix[2], &column),
-    ]
-}
-
 
 
 #[cfg(test)]
