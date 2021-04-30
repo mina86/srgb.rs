@@ -14,7 +14,7 @@ pub(crate) fn mul_add(a: f32, b: f32, c: f32) -> f32 {
 #[inline]
 #[allow(dead_code)]
 fn dot_product_fallback(a: &[f32; 3], b: &[f32; 3]) -> f32 {
-    a[2].mul_add(b[2], a[1].mul_add(b[1], a[0] * b[0]))
+    mul_add(a[2], b[2], mul_add(a[1], b[1], a[0] * b[0]))
 }
 
 
