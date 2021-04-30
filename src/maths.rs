@@ -1,10 +1,11 @@
 #[inline(always)]
-#[cfg(all(target_feature = "fma", not(test)))]
-pub(crate) fn mul_add(a: f32, b: f32, c: f32) -> f32 { a.mul_add(b, c) }
-
-#[inline(always)]
-#[cfg(any(not(target_feature = "fma"), test))]
-pub(crate) fn mul_add(a: f32, b: f32, c: f32) -> f32 { a * b + c }
+pub(crate) fn mul_add(a: f32, b: f32, c: f32) -> f32 {
+    if cfg!(feature = "no-fma") {
+        a * b + c
+    } else {
+        a.mul_add(b, c)
+    }
+}
 
 
 #[inline]

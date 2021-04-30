@@ -27,3 +27,6 @@ harness = false
 [[bench]]
 name = "gamma"
 harness = false
+
+[features]
+no-fma = []
