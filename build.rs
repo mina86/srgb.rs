@@ -4,15 +4,15 @@ use num::One;
 use num::Zero;
 
 type Scalar = num::BigRational;
-type Chromacity = rgb_derivation::Chromacity<Scalar>;
+type Chromaticity = rgb_derivation::Chromaticity<Scalar>;
 
 
 fn scalar(numer: i64, denom: i64) -> num::BigRational {
     num::BigRational::new(numer.into(), denom.into())
 }
 
-fn chromacity(x: (i64, i64), y: (i64, i64)) -> Chromacity {
-    Chromacity::new(scalar(x.0, x.1), scalar(y.0, y.1)).unwrap()
+fn chromaticity(x: (i64, i64), y: (i64, i64)) -> Chromaticity {
+    Chromaticity::new(scalar(x.0, x.1), scalar(y.0, y.1)).unwrap()
 }
 
 /// Formats scalar as a floating point number.  If denominator isn’t one, the
@@ -56,7 +56,7 @@ fn fmt_matrix<T, D: std::fmt::Display>(
     )
 }
 
-fn fmt_chromacity(ch: &Chromacity) -> std::string::String {
+fn fmt_chromaticity(ch: &Chromaticity) -> std::string::String {
     fmt_vector(&[ch.x().clone(), ch.y().clone(), One::one()])
 }
 
@@ -116,11 +116,11 @@ fn generate() -> std::io::Result<()> {
         ));
     };
 
-    let white_xy = chromacity((312713, 1000000), (329016, 1000000));
+    let white_xy = chromaticity((312713, 1000000), (329016, 1000000));
     let primaries_xy = [
-        chromacity((64, 100), (33, 100)),
-        chromacity((30, 100), (60, 100)),
-        chromacity((15, 100), (6, 100)),
+        chromaticity((64, 100), (33, 100)),
+        chromaticity((30, 100), (60, 100)),
+        chromaticity((15, 100), (6, 100)),
     ];
 
     let white_xyz = white_xy.to_xyz();
@@ -171,9 +171,9 @@ pub const XYZ_FROM_SRGB_MATRIX: [[f32; 3]; 3] = {matrix};
 /// following formula: `RGB = SRGB_FROM_XYZ_MATRIX ✕ XYZ`.
 pub const SRGB_FROM_XYZ_MATRIX: [[f32; 3]; 3] = {inverse};
 ",
-            white_xyY = fmt_chromacity(&white_xy),
+            white_xyY = fmt_chromaticity(&white_xy),
             white_XYZ = fmt_vector(&white_xyz),
-            primaries_xyY = fmt_matrix(&primaries_xy, fmt_chromacity),
+            primaries_xyY = fmt_matrix(&primaries_xy, fmt_chromaticity),
             primaries_XYZ = fmt_matrix(&primaries_xyz, fmt_vector),
             matrix = fmt_matrix(&matrix, fmt_vector),
             inverse = fmt_matrix(&inverse, fmt_vector)
