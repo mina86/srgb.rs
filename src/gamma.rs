@@ -20,7 +20,7 @@ macro_rules! expand_impl {
         } else {
             1.0
         }
-    }}
+    }};
 }
 
 macro_rules! compress_impl {
@@ -34,8 +34,9 @@ macro_rules! compress_impl {
             const A: f32 = 0.055 * RANGE;
             const D: f32 = 1.055 * RANGE;
             crate::maths::mul_add(D, $s.powf(1.0 / 2.4), -A + 0.5)
-        }) as $t + $low
-    }}
+        }) as $t +
+            $low
+    }};
 }
 
 /// Performs an sRGB gamma expansion on specified 8-bit component value.
@@ -58,9 +59,7 @@ macro_rules! compress_impl {
 /// assert_eq!(1.0,          srgb::gamma::expand_u8(255));
 /// ```
 #[inline]
-pub fn expand_u8(e: u8) -> f32 {
-    expand_impl!(e, u8, u8::MIN, u8::MAX)
-}
+pub fn expand_u8(e: u8) -> f32 { expand_impl!(e, u8, u8::MIN, u8::MAX) }
 
 /// Performs an sRGB gamma compression on specified linear component value.
 ///
@@ -82,9 +81,7 @@ pub fn expand_u8(e: u8) -> f32 {
 /// assert_eq!(255, srgb::gamma::compress_u8(1.0));
 /// ```
 #[inline]
-pub fn compress_u8(s: f32) -> u8 {
-    compress_impl!(s, u8, u8::MIN, u8::MAX)
-}
+pub fn compress_u8(s: f32) -> u8 { compress_impl!(s, u8, u8::MIN, u8::MAX) }
 
 
 /// Performs an sRGB gamma expansion on specified component value whose range is
@@ -108,9 +105,7 @@ pub fn compress_u8(s: f32) -> u8 {
 /// assert_eq!(0.21616042, srgb::gamma::expand_normalised(norm));
 /// ```
 #[inline]
-pub fn expand_rec709_8bit(e: u8) -> f32 {
-    expand_impl!(e, u8, 16, 235)
-}
+pub fn expand_rec709_8bit(e: u8) -> f32 { expand_impl!(e, u8, 16, 235) }
 
 /// Performs an sRGB gamma compression on specified linear component and encodes
 /// result as an integer in the [16, 235] range.
@@ -131,9 +126,7 @@ pub fn expand_rec709_8bit(e: u8) -> f32 {
 /// assert_eq!(0.21616042, srgb::gamma::expand_normalised(norm));
 /// ```
 #[inline]
-pub fn compress_rec709_8bit(s: f32) -> u8 {
-    compress_impl!(s, u8, 16, 235)
-}
+pub fn compress_rec709_8bit(s: f32) -> u8 { compress_impl!(s, u8, 16, 235) }
 
 /// Performs an sRGB gamma expansion on specified component value whose range is
 /// [64, 940].
@@ -156,9 +149,7 @@ pub fn compress_rec709_8bit(s: f32) -> u8 {
 /// assert_eq!(0.21936223, srgb::gamma::expand_normalised(norm));
 /// ```
 #[inline]
-pub fn expand_rec709_10bit(e: u16) -> f32 {
-    expand_impl!(e, u16, 64, 940)
-}
+pub fn expand_rec709_10bit(e: u16) -> f32 { expand_impl!(e, u16, 64, 940) }
 
 /// Performs an sRGB gamma compression on specified linear component and encodes
 /// result as an integer in the [64, 940] range.
@@ -179,9 +170,7 @@ pub fn expand_rec709_10bit(e: u16) -> f32 {
 /// assert_eq!(0.21616042, srgb::gamma::expand_normalised(norm));
 /// ```
 #[inline]
-pub fn compress_rec709_10bit(s: f32) -> u16 {
-    compress_impl!(s, u16, 64, 940)
-}
+pub fn compress_rec709_10bit(s: f32) -> u16 { compress_impl!(s, u16, 64, 940) }
 
 
 /// Performs an sRGB gamma expansion on specified normalised component value.
