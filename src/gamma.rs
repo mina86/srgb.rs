@@ -328,11 +328,15 @@ pub fn normalised_from_linear(linear: [f32; 3]) -> [f32; 3] {
 mod test {
     use approx::assert_ulps_eq;
 
-    const CASES: [(f32, u8); 8] = [
+    const CASES: [(f32, u8); 12] = [
         (0.0, 0),
+        (0.0015176348, 5),
+        (0.0030352697, 10),
+        (0.014443844, 32),
         (0.051269453, 64),
         (0.18116423, 118),
         (0.21586047, 128),
+        (0.35153255, 160),
         (0.5028864, 188),
         (0.52711517, 192),
         (0.74540424, 224),
@@ -359,7 +363,7 @@ mod test {
             assert_ulps_eq!(
                 s,
                 super::expand_normalised(e as f32 / 255.0),
-                max_ulps = 3
+                max_ulps = 5
             );
         }
     }
@@ -368,6 +372,59 @@ mod test {
     fn test_compress_normalised() {
         for (s, e) in CASES.iter().copied() {
             assert_ulps_eq!(e as f32 / 255.0, super::compress_normalised(s));
+        }
+    }
+
+    fn run_round_trip_test(
+        min: u16,
+        max: u16,
+        to_lin: impl Fn(u16) -> f32,
+        from_lin: impl Fn(f32) -> u16,
+    ) {
+        for v in min..=max {
+            let lin = to_lin(v);
+            let got = from_lin(lin);
+            assert_eq!((v, lin), (got, lin));
+        }
+    }
+
+    #[test]
+    fn test_round_trip_u8() {
+        run_round_trip_test(
+            0,
+            255,
+            |v| super::expand_u8(v as u8),
+            |v| super::compress_u8(v) as u16,
+        );
+    }
+
+    #[test]
+    fn test_round_trip_rec709_8bit() {
+        run_round_trip_test(
+            16,
+            235,
+            |v| super::expand_rec709_8bit(v as u8),
+            |v| super::compress_rec709_8bit(v) as u16,
+        );
+    }
+
+    #[test]
+    fn test_round_trip_rec709_10bit() {
+        run_round_trip_test(
+            64,
+            940,
+            super::expand_rec709_10bit,
+            super::compress_rec709_10bit,
+        );
+    }
+
+    #[test]
+    fn test_round_trip_normalised() {
+        for i in 0..=1000 {
+            let want = i as f32 / 1000.0;
+            let got =
+                super::compress_normalised(super::expand_normalised(want));
+            assert_ulps_eq!(want, got);
         }
     }
 }
