@@ -53,13 +53,13 @@ macro_rules! compress_impl {
 ///
 /// ```
 /// assert_eq!(0.0,          srgb::gamma::expand_u8(  0));
-/// assert_eq!(0.0015176348, srgb::gamma::expand_u8(  5));
-/// assert_eq!(0.046665084,  srgb::gamma::expand_u8( 61));
-/// assert_eq!(0.8148465,    srgb::gamma::expand_u8(233));
+/// assert_eq!(0.001517635,  srgb::gamma::expand_u8(  5));
+/// assert_eq!(0.046665087,  srgb::gamma::expand_u8( 61));
+/// assert_eq!(0.8148466,    srgb::gamma::expand_u8(233));
 /// assert_eq!(1.0,          srgb::gamma::expand_u8(255));
 /// ```
 #[inline]
-pub fn expand_u8(e: u8) -> f32 { expand_impl!(e, u8, u8::MIN, u8::MAX) }
+pub fn expand_u8(e: u8) -> f32 { U8_TO_LINEAR_LUT[e as usize] }
 
 /// Performs an sRGB gamma compression on specified linear component value.
 ///
@@ -237,11 +237,11 @@ pub fn compress_normalised(s: f32) -> f32 {
 /// # Example
 /// ```
 /// assert_eq!(
-///     [0.8148465, 0.80695224, 0.7991027],
+///     [0.8148466, 0.80695224, 0.7991027],
 ///     srgb::gamma::linear_from_u8([233, 232, 231])
 /// );
 /// assert_eq!(
-///     [0.6583748, 0.015208514, 0.046665084],
+///     [0.65837485, 0.015208514, 0.046665087],
 ///     srgb::gamma::linear_from_u8([212, 33, 61])
 /// );
 /// ```
@@ -330,16 +330,16 @@ mod test {
 
     const CASES: [(f32, u8); 12] = [
         (0.0, 0),
-        (0.0015176348, 5),
-        (0.0030352697, 10),
+        (0.001517635, 5),
+        (0.003035270, 10),
         (0.014443844, 32),
-        (0.051269453, 64),
-        (0.18116423, 118),
-        (0.21586047, 128),
-        (0.35153255, 160),
-        (0.5028864, 188),
-        (0.52711517, 192),
-        (0.74540424, 224),
+        (0.051269458, 64),
+        (0.181164244, 118),
+        (0.215860500, 128),
+        (0.351532599, 160),
+        (0.502886458, 188),
+        (0.527115125, 192),
+        (0.745404209, 224),
         (1.0, 255),
     ];
 

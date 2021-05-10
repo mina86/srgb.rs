@@ -182,6 +182,19 @@ pub const SRGB_FROM_XYZ_MATRIX: [[f32; 3]; 3] = {inverse};
 
     let s0 = calc_gamma_threshold::<f64>();
     let e0 = gamma_compress_lin_part(&s0);
+    let u8_to_linear = (0..=255)
+        .map(|v| {
+            if v <= (e0 * 255.0) as u8 {
+                v as f64 / 3294.6
+            } else {
+                const A: f64 = 0.055 * 255.0;
+                const D: f64 = 1.055 * 255.0;
+                ((v as f64 + A) / D).powf(2.4)
+            }
+        })
+        .map(|v| format!("    {:.e},\n", v))
+        .collect::<Vec<_>>()
+        .join("");
 
     write_to(
         &out_dir,
@@ -210,8 +223,12 @@ pub const S_0: f32 = {:.};
 /// In theory it’s also an argument at which both parts produce the same result
 /// though that’s subject to floating-point rounding.
 pub const E_0: f32 = {:.};
+
+const U8_TO_LINEAR_LUT: [f32; 256] = [
+{}
+];
 ",
-            s0, e0
+            s0, e0, u8_to_linear
         ),
     )
 }
