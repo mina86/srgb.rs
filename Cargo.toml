@@ -20,6 +20,11 @@ criterion = { version = "0.3.3", default-features = false }
 rgb_derivation = "0.2"
 num = "0.4"
 
+[build-dependencies.rug]
+version = "1.12"
+default-features = false
+features = ["float", "rational"]
+
 [[bench]]
 name = "xyz"
 harness = false

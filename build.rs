@@ -182,17 +182,27 @@ pub const SRGB_FROM_XYZ_MATRIX: [[f32; 3]; 3] = {inverse};
 
     let s0 = calc_gamma_threshold::<f64>();
     let e0 = gamma_compress_lin_part(&s0);
+
+    /* 512 bits of precision is a massive overkill but whatever, we don’t care
+     * about speed and having too much precision won’t hurt. */
+    let fl = |v| rug::Float::with_val(512, v);
     let u8_to_linear = (0..=255)
         .map(|v| {
             if v <= (e0 * 255.0) as u8 {
-                v as f64 / 3294.6
+                fl(v as u32 * 10) / fl(32946)
             } else {
-                const A: f64 = 0.055 * 255.0;
-                const D: f64 = 1.055 * 255.0;
-                ((v as f64 + A) / D).powf(2.4)
+                let v = fl(v as u32 * 1_000 + 55 * 255) / fl(1055u32 * 255);
+                let e = fl(24) / fl(10);
+                rug::ops::Pow::pow(v, e)
             }
         })
-        .map(|v| format!("    {:.e},\n", v))
+        .map(|v| {
+            /* Make sure zero is encoded as `0.0` so it’s parsed as a floating
+             * point number and not integer.  Normally, to_str_radix() does not
+             * include the decimal separator when formatting zero. */
+            let v = v.to_string_radix(10, Some(24));
+            format!("    {},\n", if v == "0" { &"0.0" } else { &v[..] })
+        })
         .collect::<Vec<_>>()
         .join("");
 
