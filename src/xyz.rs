@@ -46,47 +46,18 @@ include!(concat!(env!("OUT_DIR"), "/xyz_constants.rs"));
 
 #[cfg(test)]
 mod test {
-    use approx::assert_abs_diff_eq;
-    use approx::assert_ulps_eq;
-
-    #[derive(Debug, PartialEq)]
-    struct Arr([f32; 3]);
-
-    impl approx::AbsDiffEq for Arr {
-        type Epsilon = <f32 as approx::AbsDiffEq>::Epsilon;
-
-        fn default_epsilon() -> Self::Epsilon { 0.000001 }
-        fn abs_diff_eq(&self, rhs: &Self, epsilon: Self::Epsilon) -> bool {
-            self.0
-                .iter()
-                .zip(rhs.0.iter())
-                .all(|(a, b)| a.abs_diff_eq(b, epsilon))
-        }
-    }
-
-    impl approx::UlpsEq for Arr {
-        fn default_max_ulps() -> u32 { f32::default_max_ulps() }
-        fn ulps_eq(
-            &self,
-            rhs: &Self,
-            epsilon: Self::Epsilon,
-            max_ulps: u32,
-        ) -> bool {
-            self.0
-                .iter()
-                .zip(rhs.0.iter())
-                .all(|(a, b)| a.ulps_eq(b, epsilon, max_ulps))
-        }
-    }
-
     #[test]
     fn test_d65() {
         let [x, y, _] = super::D65_xyY;
-        let want = [x / y, 1.0, (1.0 - x - y) / y];
+        assert_eq!((0.312713, 0.329016), (x, y));
+
+        let want = [
+            (x as f64 / y as f64) as f32,
+            1.0,
+            ((1.0 - x as f64 - y as f64) / y as f64) as f32,
+        ];
         let got = super::D65_XYZ;
-        for (w, g) in want.iter().zip(got.iter()) {
-            assert_ulps_eq!(w, g, max_ulps = 1)
-        }
+        assert_eq!(&want[..], &got[..]);
     }
 
     #[test]
@@ -98,7 +69,7 @@ mod test {
             let src = [r, g, b];
             let xyz = super::xyz_from_linear(src);
             let dst = super::linear_from_xyz(xyz);
-            assert_abs_diff_eq!(Arr(src), Arr(dst));
+            approx::assert_abs_diff_eq!(&src[..], &dst[..], epsilon = 0.000001);
         }
     }
 }
