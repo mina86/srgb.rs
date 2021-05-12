@@ -57,18 +57,12 @@ mod sse {
         arch::_mm_cvtss_f32(sums)
     }
 
-    #[allow(unreachable_code)]
     pub(super) fn has_sse4_1() -> bool {
-        #[cfg(target_feature = "sse4.1")]
-        return true;
-        is_x86_feature_detected!("sse4.1")
+        cfg!(target_feature = "sse4.1") || is_x86_feature_detected!("sse4.1")
     }
 
-    #[allow(unreachable_code)]
     pub(super) fn has_sse() -> bool {
-        #[cfg(target_feature = "sse")]
-        return true;
-        is_x86_feature_detected!("sse")
+        cfg!(target_feature = "sse") || is_x86_feature_detected!("sse")
     }
 }
 
@@ -91,12 +85,12 @@ pub(crate) fn matrix_product(
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     if !cfg!(feature = "prefer-fma") && sse::has_sse() {
         return if sse::has_sse4_1() {
-            // SAFETY: We check whether CPU supports SSE 4.1.
+            // SAFETY: We’ve just checked whether CPU supports SSE 4.1.
             unsafe {
                 matrix_product_body!(sse::dot_product_sse4_1, matrix, column)
             }
         } else {
-            // SAFETY: We check whether CPU supports SSE.
+            // SAFETY: We’ve just checked whether CPU supports SSE.
             unsafe {
                 matrix_product_body!(sse::dot_product_sse, matrix, column)
             }
