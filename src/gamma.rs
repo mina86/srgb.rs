@@ -328,6 +328,8 @@ pub fn normalised_from_linear(linear: [f32; 3]) -> [f32; 3] {
 mod test {
     use approx::assert_ulps_eq;
 
+    use super::*;
+
     const CASES: [(f32, u8); 12] = [
         (0.0, 0),
         (0.001517635, 5),
@@ -346,14 +348,14 @@ mod test {
     #[test]
     fn test_expand_u8() {
         for (s, e) in CASES.iter().copied() {
-            assert_eq!(s, super::expand_u8(e));
+            assert_eq!(s, expand_u8(e));
         }
     }
 
     #[test]
     fn test_compress_u8() {
         for (s, e) in CASES.iter().copied() {
-            assert_eq!(e, super::compress_u8(s));
+            assert_eq!(e, compress_u8(s));
         }
     }
 
@@ -362,7 +364,7 @@ mod test {
         for (s, e) in CASES.iter().copied() {
             assert_ulps_eq!(
                 s,
-                super::expand_normalised(e as f32 / 255.0),
+                expand_normalised(e as f32 / 255.0),
                 max_ulps = 5
             );
         }
@@ -371,7 +373,7 @@ mod test {
     #[test]
     fn test_compress_normalised() {
         for (s, e) in CASES.iter().copied() {
-            assert_ulps_eq!(e as f32 / 255.0, super::compress_normalised(s));
+            assert_ulps_eq!(e as f32 / 255.0, compress_normalised(s));
         }
     }
 
@@ -393,8 +395,8 @@ mod test {
         run_round_trip_test(
             0,
             255,
-            |v| super::expand_u8(v as u8),
-            |v| super::compress_u8(v) as u16,
+            |v| expand_u8(v as u8),
+            |v| compress_u8(v) as u16,
         );
     }
 
@@ -403,8 +405,8 @@ mod test {
         run_round_trip_test(
             16,
             235,
-            |v| super::expand_rec709_8bit(v as u8),
-            |v| super::compress_rec709_8bit(v) as u16,
+            |v| expand_rec709_8bit(v as u8),
+            |v| compress_rec709_8bit(v) as u16,
         );
     }
 
@@ -413,8 +415,8 @@ mod test {
         run_round_trip_test(
             64,
             940,
-            super::expand_rec709_10bit,
-            super::compress_rec709_10bit,
+            expand_rec709_10bit,
+            compress_rec709_10bit,
         );
     }
 
@@ -422,9 +424,28 @@ mod test {
     fn test_round_trip_normalised() {
         for i in 0..=1000 {
             let want = i as f32 / 1000.0;
-            let got =
-                super::compress_normalised(super::expand_normalised(want));
+            let got = compress_normalised(expand_normalised(want));
             assert_ulps_eq!(want, got);
         }
+    }
+
+    #[test]
+    fn test_round_trip_error() {
+        let mut error_ec = kahan::KahanSum::new();
+        let mut error_ce = kahan::KahanSum::new();
+        for i in 0..=1000 {
+            let want = i as f32 / 1000.0;
+            let diff = want as f64 -
+                compress_normalised(expand_normalised(want)) as f64;
+            error_ec += diff * diff;
+            let diff = want as f64 -
+                expand_normalised(compress_normalised(want)) as f64;
+            error_ce += diff * diff;
+        }
+
+        assert_eq!(
+            (0.43569314822633487, 3.0850596057820088),
+            (error_ec.sum() * 1e12, error_ce.sum() * 1e12)
+        );
     }
 }

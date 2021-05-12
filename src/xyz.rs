@@ -62,14 +62,22 @@ mod test {
 
     #[test]
     fn test_reversible_conversion() {
+        let mut error = kahan::KahanSum::new();
         for c in 0..(16 * 16 * 16) {
             let r = (c & 15) as f32 / 15.0;
             let g = ((c >> 4) & 15) as f32 / 15.0;
             let b = ((c >> 8) & 15) as f32 / 15.0;
             let src = [r, g, b];
-            let xyz = super::xyz_from_linear(src);
-            let dst = super::linear_from_xyz(xyz);
+            let dst = super::linear_from_xyz(super::xyz_from_linear(src));
             approx::assert_abs_diff_eq!(&src[..], &dst[..], epsilon = 0.000001);
+
+            let r = r as f64 - dst[0] as f64;
+            let g = g as f64 - dst[1] as f64;
+            let b = b as f64 - dst[2] as f64;
+            error += r * r;
+            error += g * g;
+            error += b * b;
         }
+        assert_eq!(62.71521153793259, error.sum() * 1e12);
     }
 }

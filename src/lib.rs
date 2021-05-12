@@ -153,3 +153,60 @@ pub(crate) fn arr_map<F: Copy, T: Copy, Fun: Fn(F) -> T>(
 ) -> [T; 3] {
     [f(arr[0]), f(arr[1]), f(arr[2])]
 }
+
+
+#[cfg(test)]
+mod test {
+    use kahan::KahanSummator;
+
+    const WHITE_X: f64 = 0.312713;
+    const WHITE_Y: f64 = 0.329016;
+
+    fn measure_grey_chromaticity_error(f: impl Fn(u8) -> [f32; 3]) -> f64 {
+        // Grey colours should have chromaticity equal white point’s
+        // chromaticity.
+        let mut error = kahan::KahanSum::new();
+        for i in 1..=255 {
+            let [x, y, z] = f(i);
+            let d: f64 =
+                [x as f64, y as f64, z as f64].iter().kahan_sum().sum();
+            let x = x as f64 / d - WHITE_X;
+            let y = y as f64 / d - WHITE_Y;
+            error += x * x;
+            error += y * y;
+        }
+        error.sum() * 1e15
+    }
+
+    #[test]
+    fn test_grey_chromaticity_error_u8() {
+        assert_eq!(
+            48.99296021015466,
+            measure_grey_chromaticity_error(|i| {
+                super::xyz_from_u8([i, i, i])
+            })
+        );
+    }
+
+    #[test]
+    fn test_grey_chromaticity_error_normalised() {
+        assert_eq!(
+            39.81365168327802,
+            measure_grey_chromaticity_error(|i| {
+                let v = i as f32 / 255.0;
+                super::xyz_from_normalised([v, v, v])
+            })
+        );
+    }
+
+    #[test]
+    fn test_grey_chromaticity_error_linear() {
+        assert_eq!(
+            50.927415198412874,
+            measure_grey_chromaticity_error(|i| {
+                let v = i as f32 / 255.0;
+                crate::xyz::xyz_from_linear([v, v, v])
+            })
+        );
+    }
+}

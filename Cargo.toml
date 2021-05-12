@@ -13,8 +13,9 @@ edition       = "2018"
 
 [dev-dependencies]
 approx = "0.4"
-delta_e = "^0.2"
 criterion = { version = "0.3.3", default-features = false }
+delta_e = "^0.2"
+kahan = "0.1"
 
 [build-dependencies]
 rgb_derivation = "0.2"
