@@ -3,42 +3,6 @@
 // Defines S_0 and E_0 constants
 include!(concat!(env!("OUT_DIR"), "/gamma_constants.rs"));
 
-macro_rules! expand_impl {
-    ($e:ident, $t:ty, $low:expr, $high:expr) => {{
-        const FULL_RANGE: bool = $low == <$t>::MIN && $high == <$t>::MAX;
-        const RANGE: f32 = ($high - $low) as f32;
-        const THRESHOLD: $t = (E_0 * RANGE) as $t + $low;
-        if !FULL_RANGE && $e <= $low {
-            0.0
-        } else if $e <= THRESHOLD {
-            const D: f32 = 12.92 * RANGE;
-            ($e - $low) as f32 / D
-        } else if FULL_RANGE || $e < $high {
-            const A: f32 = 0.055 * RANGE;
-            const D: f32 = 1.055 * RANGE;
-            ((($e - $low) as f32 + A) / D).powf(2.4)
-        } else {
-            1.0
-        }
-    }};
-}
-
-macro_rules! compress_impl {
-    ($s:ident, $t:ty, $low:expr, $high:expr) => {{
-        const RANGE: f32 = ($high - $low) as f32;
-        // Adding 0.5 is for rounding.
-        (if $s <= S_0 {
-            const D: f32 = 12.92 * RANGE;
-            crate::maths::mul_add($s.max(0.0), D, 0.5)
-        } else {
-            const A: f32 = 0.055 * RANGE;
-            const D: f32 = 1.055 * RANGE;
-            crate::maths::mul_add(D, $s.powf(1.0 / 2.4), -A + 0.5)
-        }) as $t +
-            $low
-    }};
-}
-
 /// Performs an sRGB gamma expansion on specified 8-bit component value.
 ///
 /// In other words, converts an 8-bit sRGB component value into a linear sRGB
@@ -81,96 +45,138 @@ pub fn expand_u8(e: u8) -> f32 { U8_TO_LINEAR_LUT[e as usize] }
 /// assert_eq!(255, srgb::gamma::compress_u8(1.0));
 /// ```
 #[inline]
-pub fn compress_u8(s: f32) -> u8 { compress_impl!(s, u8, u8::MIN, u8::MAX) }
+pub fn compress_u8(s: f32) -> u8 {
+    // Adding 0.5 is for rounding.
+    (if s <= S_0 {
+        const D: f32 = 12.92 * 255.0;
+        crate::maths::mul_add(s.max(0.0), D, 0.5)
+    } else {
+        const A: f32 = 0.055 * 255.0;
+        const D: f32 = 1.055 * 255.0;
+        crate::maths::mul_add(D, s.powf(5.0 / 12.0), -A + 0.5)
+    }) as u8
+}
 
+macro_rules! compress_rec709_impl {
+    ($s:ident, $t:ty, $low:expr, $high:expr) => {{
+        const RANGE: f32 = ($high - $low) as f32;
+        // Adding 0.5 is for rounding.
+        (if $s <= 0.018 {
+            const D: f32 = 4.5 * RANGE;
+            crate::maths::mul_add($s.max(0.0), D, 0.5)
+        } else {
+            const A: f32 = 0.099 * RANGE;
+            const D: f32 = 1.099 * RANGE;
+            crate::maths::mul_add(D, $s.powf(1.0 / 2.2), -A + 0.5)
+        }) as $t +
+            $low
+    }};
+}
 
-/// Performs an sRGB gamma expansion on specified component value whose range is
-/// [16, 235].
+macro_rules! expand_rec709_impl {
+    ($e:ident, $t:ty, $low:expr, $high:expr) => {{
+        const RANGE: f32 = ($high - $low) as f32;
+        const THRESHOLD: $t = (4.5 * 0.018 * RANGE) as $t + $low;
+        if $e <= $low {
+            0.0
+        } else if $e <= THRESHOLD {
+            const D: f32 = 4.5 * RANGE;
+            ($e - $low) as f32 / D
+        } else if $e < $high {
+            const A: f32 = 0.099 * RANGE;
+            const D: f32 = 1.099 * RANGE;
+            ((($e - $low) as f32 + A) / D).powf(2.2)
+        } else {
+            1.0
+        }
+    }};
+}
+
+/// Performs an Rec.709 gamma expansion on specified component value whose range
+/// is [16, 235].
 ///
 /// The value is clamped to the expected range.  The range corresponds to 8-bit
-/// coding in Rec.709 standard.
+/// coding in Rec.709 standard.  Note that Rec.709 transfer function is
+/// different from sRGB transfer function (even though both standards use the
+/// same primaries and white point).
 ///
 /// # Example
 ///
 /// ```
 /// assert_eq!(0.0,          srgb::gamma::expand_rec709_8bit(  0));
 /// assert_eq!(0.0,          srgb::gamma::expand_rec709_8bit( 16));
-/// assert_eq!(0.0007068437, srgb::gamma::expand_rec709_8bit( 18));
-/// assert_eq!(0.94884676,   srgb::gamma::expand_rec709_8bit(230));
+/// assert_eq!(0.0020294266, srgb::gamma::expand_rec709_8bit( 18));
+/// assert_eq!(0.9548653,    srgb::gamma::expand_rec709_8bit(230));
 /// assert_eq!(1.0,          srgb::gamma::expand_rec709_8bit(235));
 /// assert_eq!(1.0,          srgb::gamma::expand_rec709_8bit(255));
-///
-/// let norm = srgb::rec709::decode_rec709_8bit(126);
-/// assert_eq!(0.21616048, srgb::gamma::expand_rec709_8bit(126));
-/// assert_eq!(0.21616042, srgb::gamma::expand_normalised(norm));
 /// ```
 #[inline]
-pub fn expand_rec709_8bit(e: u8) -> f32 { expand_impl!(e, u8, 16, 235) }
+pub fn expand_rec709_8bit(e: u8) -> f32 { expand_rec709_impl!(e, u8, 16, 235) }
 
 /// Performs an sRGB gamma compression on specified linear component and encodes
 /// result as an integer in the [16, 235] range.
 ///
 /// The value is clamped to the [0.0, 1.0] range.  The range of the result
-/// corresponds to 8-bit coding in Rec.709 standard.
+/// corresponds to 8-bit coding in Rec.709 standard.  Note that Rec.709 transfer
+/// function is different from sRGB transfer function (even though both
+/// standards use the same primaries and white point).
 ///
 /// # Example
 ///
 /// ```
 /// assert_eq!( 16, srgb::gamma::compress_rec709_8bit(0.0));
-/// assert_eq!( 18, srgb::gamma::compress_rec709_8bit(0.0007));
-/// assert_eq!(230, srgb::gamma::compress_rec709_8bit(0.9488));
+/// assert_eq!( 18, srgb::gamma::compress_rec709_8bit(0.002));
+/// assert_eq!(230, srgb::gamma::compress_rec709_8bit(0.954));
 /// assert_eq!(235, srgb::gamma::compress_rec709_8bit(1.0));
-///
-/// assert_eq!(126, srgb::gamma::compress_rec709_8bit(0.21616048));
-/// let norm = srgb::rec709::decode_rec709_8bit(126);
-/// assert_eq!(0.21616042, srgb::gamma::expand_normalised(norm));
 /// ```
 #[inline]
-pub fn compress_rec709_8bit(s: f32) -> u8 { compress_impl!(s, u8, 16, 235) }
+pub fn compress_rec709_8bit(s: f32) -> u8 {
+    compress_rec709_impl!(s, u8, 16, 235)
+}
 
-/// Performs an sRGB gamma expansion on specified component value whose range is
-/// [64, 940].
+/// Performs an Rec.709 gamma expansion on specified component value whose range
+/// is [64, 940].
 ///
 /// The value is clamped to the expected range.  The range corresponds to 10-bit
-/// coding in Rec.709 standard.
+/// coding in Rec.709 standard.  Note that Rec.709 transfer function is
+/// different from sRGB transfer function (even though both standards use the
+/// same primaries and white point).
 ///
 /// # Example
 ///
 /// ```
 /// assert_eq!(0.0,           srgb::gamma::expand_rec709_10bit(   0));
 /// assert_eq!(0.0,           srgb::gamma::expand_rec709_10bit(  64));
-/// assert_eq!(0.00053013273, srgb::gamma::expand_rec709_10bit(  70));
-/// assert_eq!(0.67418975,    srgb::gamma::expand_rec709_10bit( 800));
+/// assert_eq!(0.00152207,    srgb::gamma::expand_rec709_10bit(  70));
+/// assert_eq!(0.7077097,     srgb::gamma::expand_rec709_10bit( 800));
 /// assert_eq!(1.0,           srgb::gamma::expand_rec709_10bit( 940));
 /// assert_eq!(1.0,           srgb::gamma::expand_rec709_10bit(1023));
-///
-/// let norm = srgb::rec709::decode_rec709_10bit(507);
-/// assert_eq!(0.21936223, srgb::gamma::expand_rec709_10bit(507));
-/// assert_eq!(0.21936223, srgb::gamma::expand_normalised(norm));
 /// ```
 #[inline]
-pub fn expand_rec709_10bit(e: u16) -> f32 { expand_impl!(e, u16, 64, 940) }
+pub fn expand_rec709_10bit(e: u16) -> f32 {
+    expand_rec709_impl!(e, u16, 64, 940)
+}
 
-/// Performs an sRGB gamma compression on specified linear component and encodes
-/// result as an integer in the [64, 940] range.
+/// Performs an Rec.709 gamma compression on specified linear component and
+/// encodes result as an integer in the [64, 940] range.
 ///
 /// The value is clamped to the [0.0, 1.0] range.  The range of the result
-/// corresponds to 10-bit coding in Rec.709 standard.
+/// corresponds to 10-bit coding in Rec.709 standard.  Note that Rec.709
+/// transfer function is different from sRGB transfer function (even though both
+/// standards use the same primaries and white point).
 ///
 /// # Example
 ///
 /// ```
 /// assert_eq!(  64, srgb::gamma::compress_rec709_10bit(0.0));
-/// assert_eq!(  70, srgb::gamma::compress_rec709_10bit(0.000530));
-/// assert_eq!( 800, srgb::gamma::compress_rec709_10bit(0.674189));
+/// assert_eq!(  70, srgb::gamma::compress_rec709_10bit(0.0015));
+/// assert_eq!( 800, srgb::gamma::compress_rec709_10bit(0.7077));
 /// assert_eq!( 940, srgb::gamma::compress_rec709_10bit(1.0));
-///
-/// assert_eq!(504, srgb::gamma::compress_rec709_10bit(0.21616048));
-/// let norm = srgb::rec709::decode_rec709_10bit(504);
-/// assert_eq!(0.21616042, srgb::gamma::expand_normalised(norm));
 /// ```
 #[inline]
-pub fn compress_rec709_10bit(s: f32) -> u16 { compress_impl!(s, u16, 64, 940) }
+pub fn compress_rec709_10bit(s: f32) -> u16 {
+    compress_rec709_impl!(s, u16, 64, 940)
+}
 
 
 /// Performs an sRGB gamma expansion on specified normalised component value.

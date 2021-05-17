@@ -56,7 +56,6 @@
 //! Note that `no-fma` and `prefer-fma` are mutually exclusive
 
 pub mod gamma;
-pub mod rec709;
 pub mod xyz;
 
 mod maths;
