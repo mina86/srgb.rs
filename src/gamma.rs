@@ -53,7 +53,7 @@ pub fn compress_u8(s: f32) -> u8 {
     } else {
         const A: f32 = 0.055 * 255.0;
         const D: f32 = 1.055 * 255.0;
-        crate::maths::mul_add(D, s.powf(5.0 / 12.0), -A + 0.5)
+        crate::maths::mul_add(D, s.min(1.0).powf(5.0 / 12.0), -A + 0.5)
     }) as u8
 }
 
@@ -67,7 +67,7 @@ macro_rules! compress_rec709_impl {
         } else {
             const A: f32 = 0.099 * RANGE;
             const D: f32 = 1.099 * RANGE;
-            crate::maths::mul_add(D, $s.powf(1.0 / 2.2), -A + 0.5)
+            crate::maths::mul_add(D, $s.min(1.0).powf(1.0 / 2.2), -A + 0.5)
         }) as $t +
             $low
     }};
