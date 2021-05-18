@@ -29,10 +29,7 @@ mod sse {
     #[allow(dead_code)]
     #[target_feature(enable = "sse")]
     unsafe fn m128_from_array(arr: &[f32; 3]) -> arch::__m128 {
-        #[repr(C, align(16))]
-        struct Arr([f32; 4]);
-        let arr = Arr([arr[0], arr[1], arr[2], 0.0]);
-        core::mem::transmute(arr)
+        arch::_mm_set_ps(arr[0], arr[1], arr[2], 0.0)
     }
 
     #[target_feature(enable = "sse4.1")]
