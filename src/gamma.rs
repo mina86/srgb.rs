@@ -427,6 +427,16 @@ mod test {
     }
 
     #[test]
+    fn test_rec709_scaling() {
+        for v in 16..=235 {
+            let expanded = expand_rec709_8bit(v);
+            assert_eq!(expanded, expand_rec709_10bit(v as u16 * 4));
+            assert_eq!(compress_rec709_8bit(expanded) as u16 * 4,
+                       compress_rec709_10bit(expanded));
+        }
+    }
+
+    #[test]
     fn test_round_trip_normalised() {
         for i in 0..=1000 {
             let want = i as f32 / 1000.0;
