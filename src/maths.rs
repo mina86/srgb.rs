@@ -13,15 +13,12 @@
  * You should have received a copy of the GNU General Public License along with
  * srgb crate.  If not, see <http://www.gnu.org/licenses/>. */
 
-#[cfg(all(feature = "no-fma", feature = "prefer-fma"))]
-compile_error!("no-fma and prefer-fma features cannot both be enabled");
-
 #[inline(always)]
 pub(crate) fn mul_add(a: f32, b: f32, c: f32) -> f32 {
-    if cfg!(feature = "no-fma") {
-        a * b + c
-    } else {
+    if cfg!(target_feature = "fma") {
         a.mul_add(b, c)
+    } else {
+        a * b + c
     }
 }
 
@@ -95,7 +92,7 @@ pub(crate) fn matrix_product(
     column: [f32; 3],
 ) -> [f32; 3] {
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    if !cfg!(feature = "prefer-fma") && sse::has_sse() {
+    if sse::has_sse() {
         return if sse::has_sse4_1() {
             // SAFETY: We’ve just checked whether CPU supports SSE 4.1.
             unsafe {

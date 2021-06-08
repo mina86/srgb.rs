@@ -233,7 +233,7 @@ pub fn expand_normalised(e: f32) -> f32 {
 ///
 /// ```
 /// assert_eq!(0.0,        srgb::gamma::compress_normalised(0.0));
-/// assert_eq!(0.23921569, srgb::gamma::compress_normalised(0.046665084));
+/// assert_eq!(0.23921567, srgb::gamma::compress_normalised(0.046665084));
 /// assert_eq!(0.91372544, srgb::gamma::compress_normalised(0.8148465));
 /// // Unfortunately, imprecision of floating point numbers may be an issue:
 /// assert_eq!(0.99999994, srgb::gamma::compress_normalised(1.0));
@@ -335,7 +335,7 @@ pub fn linear_from_normalised(normalised: [f32; 3]) -> [f32; 3] {
 ///     srgb::gamma::normalised_from_linear([0.8148467, 0.80695236, 0.79910284])
 /// );
 /// assert_eq!(
-///     [0.83137256, 0.12941168, 0.23921566],
+///     [0.83137256, 0.1294117, 0.23921564],
 ///     srgb::gamma::normalised_from_linear([0.65837485, 0.0152085, 0.04666508])
 /// );
 /// ```
@@ -475,7 +475,7 @@ mod test {
         }
 
         assert_eq!(
-            (0.43569314822633487, 3.0850596057820088),
+            (0.24183433033897472, 2.3217916846930695),
             (error_ec.sum() * 1e12, error_ce.sum() * 1e12)
         );
     }
