@@ -19,14 +19,14 @@ dependency:
 
 ```toml
 [dependencies]
-srgb = "0.1"
+srgb = "0.2"
 ```
 
 With that dependency in place, it’s now simple to write an application
 which converts an sRGB colour into other colour spaces:
 
 
-```
+```rust
 #[derive(Debug)]
 struct RGB(u8, u8, u8);
 
