@@ -7,7 +7,7 @@ categories    = ["graphics", "multimedia::images", "multimedia::video"]
 keywords      = ["srgb", "xyz", "color", "rgb", "rec709"]
 authors       = ["Michal Nazarewicz <mina86@mina86.com>"]
 license       = "LGPL-3.0-or-later"
-repository    = "https://github.com/mina86/srgb"
+repository    = "https://github.com/mina86/srgb.rs"
 documentation = "https://docs.rs/srgb"
 edition       = "2018"
 
