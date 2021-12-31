@@ -62,7 +62,8 @@ pub fn expand_u8(e: u8) -> f32 { U8_TO_LINEAR_LUT[e as usize] }
 #[inline]
 pub fn compress_u8(s: f32) -> u8 {
     // Adding 0.5 is for rounding.
-    (if s <= S_0 {
+    (if !(s > S_0) {
+        // Also handles NaNs.
         const D: f32 = 12.92 * 255.0;
         crate::maths::mul_add(s.max(0.0), D, 0.5)
     } else {
@@ -76,7 +77,8 @@ macro_rules! compress_rec709_impl {
     ($s:ident, $t:ty, $low:expr, $high:expr) => {{
         const RANGE: f32 = ($high - $low) as f32;
         // Adding 0.5 is for rounding.
-        (if $s <= 0.018 {
+        (if !($s > 0.018) {
+            // Also handles NaNs.
             const D: f32 = 4.5 * RANGE;
             crate::maths::mul_add($s.max(0.0), D, 0.5)
         } else {
@@ -213,7 +215,8 @@ pub fn compress_rec709_10bit(s: f32) -> u16 {
 /// ```
 #[inline]
 pub fn expand_normalised(e: f32) -> f32 {
-    if e <= E_0 {
+    if !(e > E_0) {
+        // Also handles NaNs.
         e / 12.92
     } else {
         ((e as f32 + 0.055) / 1.055).powf(2.4)
@@ -240,7 +243,8 @@ pub fn expand_normalised(e: f32) -> f32 {
 /// ```
 #[inline]
 pub fn compress_normalised(s: f32) -> f32 {
-    if s <= S_0 {
+    if !(s > S_0) {
+        // Also handles NaNs.
         12.92 * s
     } else {
         crate::maths::mul_add(1.055, s.powf(1.0 / 2.4), -0.055)
@@ -446,8 +450,10 @@ mod test {
         for v in 16..=235 {
             let expanded = expand_rec709_8bit(v);
             assert_eq!(expanded, expand_rec709_10bit(v as u16 * 4));
-            assert_eq!(compress_rec709_8bit(expanded) as u16 * 4,
-                       compress_rec709_10bit(expanded));
+            assert_eq!(
+                compress_rec709_8bit(expanded) as u16 * 4,
+                compress_rec709_10bit(expanded)
+            );
         }
     }
 
