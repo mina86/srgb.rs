@@ -10,6 +10,18 @@ fn expand_u8(c: &mut criterion::Criterion) {
     });
 }
 
+fn compress_u8_precise(c: &mut criterion::Criterion) {
+    c.bench_function("compress 8-bit precise", move |b| {
+        b.iter(|| {
+            for s in 0..=255 {
+                criterion::black_box(srgb::gamma::compress_u8_precise(
+                    s as f32 / 255.0,
+                ));
+            }
+        });
+    });
+}
+
 fn compress_u8(c: &mut criterion::Criterion) {
     c.bench_function("compress 8-bit", move |b| {
         b.iter(|| {
@@ -93,6 +105,7 @@ fn compress_normalised(c: &mut criterion::Criterion) {
 criterion_group!(
     benches,
     expand_u8,
+    compress_u8_precise,
     compress_u8,
     expand_rec709_8bit,
     compress_rec709_8bit,
