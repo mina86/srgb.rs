@@ -595,6 +595,7 @@ pub fn normalised_from_linear(linear: [f32; 3]) -> [f32; 3] {
 #[cfg(test)]
 mod test {
     use approx::assert_ulps_eq;
+    use float_next_after::NextAfter;
 
     use super::*;
 
@@ -751,8 +752,6 @@ mod test {
 
     #[test]
     fn test_compress_u8_increases() {
-        use float_next_after::NextAfter;
-
         // Starting at 0.0 makes this test dramatically slower so skip the first
         // few values.
         let mut value = 0.0001;
@@ -781,5 +780,53 @@ mod test {
             prev = res;
         }
         assert_eq!(255, prev, "Didn’t reach 255");
+    }
+
+    #[test]
+    fn test_compress_u8_statistics() {
+        fn edges(compress: fn(f32) -> u8) -> [f32; 255] {
+            let mut edges = [0.0; 255];
+            let mut x = 0.0001;
+            while compress(x) != 0 {
+                x *= 0.5;
+                assert_ne!(x, 0.0);
+            }
+            edges[0] = x;
+            loop {
+                x = x.next_after(std::f32::INFINITY);
+                assert!(x < 1.0);
+                let y = compress(x);
+                if y == 255 {
+                    break edges;
+                }
+                edges[y as usize] = x;
+            }
+        }
+
+        let want = edges(compress_u8_precise);
+        let got = edges(compress_u8);
+
+        let mut max_abs_error = 0.0;
+        let mut abs_error = kahan::KahanSum::new();
+        let mut squared_error = kahan::KahanSum::new();
+        for (a, b) in want.iter().zip(got.iter()) {
+            let err = (a - b).abs();
+            abs_error += err;
+            squared_error += err * err;
+            if err > max_abs_error {
+                max_abs_error = err;
+            }
+        }
+
+        let scale = (1 << 14) as f32;
+        let count = want.len() as f32;
+        let aad = abs_error.sum() / count * scale;
+        let rmse = (squared_error.sum() / count).sqrt() * scale;
+        max_abs_error *= scale;
+
+        assert_eq!(
+            (0.8496094, 0.27195325, 0.34617355),
+            (max_abs_error, aad, rmse)
+        );
     }
 }
