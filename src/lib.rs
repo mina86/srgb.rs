@@ -94,16 +94,16 @@ pub fn u8_from_normalised(normalised: [f32; 3]) -> [u8; 3] {
 
 /// Converts a colour in an XYZ colour space into 24-bit sRGB representation.
 ///
-/// This is just a convenience function which wraps gamma (see ['gamma'] module)
-/// and XYZ (see ['xyz'] module) conversions function together.
+/// This is just a convenience function which wraps gamma (see [`gamma`] module)
+/// and XYZ (see [`xyz`] module) conversions function together.
 pub fn u8_from_xyz(xyz: [f32; 3]) -> [u8; 3] {
     gamma::u8_from_linear(xyz::linear_from_xyz(xyz))
 }
 
 /// Converts a 24-bit sRGB colour into XYZ colour space.
 ///
-/// This is just a convenience function which wraps gamma (see ['gamma'] module)
-/// and XYZ (see ['xyz'] module) conversions function together.
+/// This is just a convenience function which wraps gamma (see [`gamma`] module)
+/// and XYZ (see [`xyz`] module) conversions function together.
 pub fn xyz_from_u8(rgb: [u8; 3]) -> [f32; 3] {
     xyz::xyz_from_linear(gamma::linear_from_u8(rgb))
 }
@@ -111,16 +111,16 @@ pub fn xyz_from_u8(rgb: [u8; 3]) -> [f32; 3] {
 /// Converts a colour in an XYZ colour space into a normalised sRGB
 /// representation.
 ///
-/// This is just a convenience function which wraps gamma (see ['gamma'] module)
-/// and XYZ (see ['xyz'] module) conversions function together.
+/// This is just a convenience function which wraps gamma (see [`gamma`] module)
+/// and XYZ (see [`xyz`] module) conversions function together.
 pub fn normalised_from_xyz(xyz: [f32; 3]) -> [f32; 3] {
     gamma::normalised_from_linear(xyz::linear_from_xyz(xyz))
 }
 
 /// Converts a normalised representation of a sRGB colour into XYZ colour space.
 ///
-/// This is just a convenience function which wraps gamma (see ['gamma'] module)
-/// and XYZ (see ['xyz'] module) conversions function together.
+/// This is just a convenience function which wraps gamma (see [`gamma`] module)
+/// and XYZ (see [`xyz`] module) conversions function together.
 pub fn xyz_from_normalised(rgb: [f32; 3]) -> [f32; 3] {
     xyz::xyz_from_linear(gamma::linear_from_normalised(rgb))
 }
