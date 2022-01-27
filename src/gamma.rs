@@ -44,7 +44,7 @@ pub fn expand_u8(e: u8) -> f32 { U8_TO_LINEAR_LUT[e as usize] }
 ///
 /// In other words, converts a linear sRGB component into an 8-bit sRGB value.
 /// The argument must be in the range from zero to one.  The result will be in
-/// the range 0–255 range.
+/// the 0–255 range.
 ///
 /// # Example
 ///
@@ -60,7 +60,7 @@ pub fn expand_u8(e: u8) -> f32 { U8_TO_LINEAR_LUT[e as usize] }
 ///
 /// Since version 0.3, this function uses an approximated formula.  Importantly,
 /// it has over 14 bits of precision which means that it’s sufficient for all
-/// piratical applications.  Furthermore, it is an inverse of [`expand_u8()`] so
+/// practical applications.  Furthermore, it is an inverse of [`expand_u8()`] so
 /// for any integer `n` the comparison `n == compress_u8(expand_u8(n))` holds.
 ///
 /// Since the function returns an 8-bit integer talking about precision or error
@@ -136,7 +136,7 @@ pub fn compress_u8(s: f32) -> u8 {
 /// the range 0–255 range.
 ///
 /// Unlike [`compress_u8()`] function, this function uses exact sRGB gamma
-/// formula and as a result it’s over 2.5 times slower.
+/// formula and as a result is over 2.5 times slower.
 ///
 /// # Example
 ///

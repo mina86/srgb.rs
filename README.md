@@ -12,6 +12,12 @@ convert between sRGB and other colour spaces (if the conversion requires
 going through XYZ colour space) or blend colours together (which requires
 performing gamma correction).
 
+The crate includes highly-optimised 8-bit gamma functions both when
+converting from an 8-bit compressed value to a floating point linear
+value as well as conversion in the opposite direction.  The latter is
+over two and a half times faster than naïve implementation of the
+gamma compression formula.
+
 ## Usage
 
 Using this package with Cargo projects is as simple as adding a single
