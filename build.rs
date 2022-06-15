@@ -238,7 +238,7 @@ pub const SRGB_FROM_XYZ_MATRIX: [[f32; 3]; 3] = {inverse};
 /// though that’s subject to floating-point rounding.
 pub const S_0: f32 = {:.};
 
-/// The threshold at which sRGB gamma compression switches from linear to power
+/// The threshold at which sRGB gamma expansion switches from linear to power
 /// function.
 ///
 /// While many RGB colour models use a simple power function as their gamma
