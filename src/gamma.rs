@@ -518,7 +518,7 @@ pub fn compress_normalised(s: f32) -> f32 {
 /// );
 /// ```
 #[inline]
-pub fn linear_from_u8(encoded: [u8; 3]) -> [f32; 3] {
+pub fn linear_from_u8(encoded: impl std::convert::Into<[u8; 3]>) -> [f32; 3] {
     super::arr_map(encoded, expand_u8)
 }
 
@@ -542,7 +542,7 @@ pub fn linear_from_u8(encoded: [u8; 3]) -> [f32; 3] {
 /// );
 /// ```
 #[inline]
-pub fn u8_from_linear(linear: [f32; 3]) -> [u8; 3] {
+pub fn u8_from_linear(linear: impl std::convert::Into<[f32; 3]>) -> [u8; 3] {
     super::arr_map(linear, compress_u8)
 }
 
@@ -567,7 +567,9 @@ pub fn u8_from_linear(linear: [f32; 3]) -> [u8; 3] {
 /// );
 /// ```
 #[inline]
-pub fn linear_from_normalised(normalised: [f32; 3]) -> [f32; 3] {
+pub fn linear_from_normalised(
+    normalised: impl std::convert::Into<[f32; 3]>,
+) -> [f32; 3] {
     super::arr_map(normalised, expand_normalised)
 }
 
@@ -591,7 +593,9 @@ pub fn linear_from_normalised(normalised: [f32; 3]) -> [f32; 3] {
 /// );
 /// ```
 #[inline]
-pub fn normalised_from_linear(linear: [f32; 3]) -> [f32; 3] {
+pub fn normalised_from_linear(
+    linear: impl std::convert::Into<[f32; 3]>,
+) -> [f32; 3] {
     super::arr_map(linear, compress_normalised)
 }
 

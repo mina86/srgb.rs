@@ -13,28 +13,7 @@
  * You should have received a copy of the GNU General Public License along with
  * srgb crate.  If not, see <http://www.gnu.org/licenses/>. */
 
-//! The crate provides primitives for manipulating colours in sRGB colour space.
-//!
-//! Specifically, it provides functions for converting between sRGB space,
-//! linear sRGB space and XYZ colour space; as well as exposes the definition of
-//! D65 reference white point as well as XYZ colour conversion matrices; and in
-//! addition provides functions for handling
-//! [Rec.709](https://www.itu.int/rec/R-REC-BT.709-6-201506-I/en) components
-//! encoding.
-//!
-//! The crate intents to provide low-level primitives needed to work with sRGB
-//! colour space.  Those primitives can be used by other libraries which need to
-//! convert between sRGB and other colour spaces (if the conversion requires
-//! going through XYZ colour space) or blend colours together (which requires
-//! performing gamma correction).
-//!
-//! Functions provided in the main module implement conversions between sRGB and
-//! XYZ colour spaces while providing routines for intermediate conversions.
-//! Functions in [`gamma`] submodule provide functions for doing gamma
-//! compression and expansion; they operate on a single colour component.
-//! Lastly, [`xyz`] submodule provides functions for converting between linear
-//! sRGB and XYZ colour spaces as well as constants exposing the matrices used
-//! by those functions.
+#![doc = include_str!("../README.md")]
 
 pub mod gamma;
 pub mod xyz;
@@ -59,9 +38,10 @@ mod maths;
 ///     srgb::normalised_from_u8([212, 33, 61])
 /// );
 /// ```
-#[inline]
 #[doc(hidden)]
-pub fn normalised_from_u8(encoded: [u8; 3]) -> [f32; 3] {
+pub fn normalised_from_u8(
+    encoded: impl std::convert::Into<[u8; 3]>,
+) -> [f32; 3] {
     arr_map(encoded, |v| v as f32 / 255.0)
 }
 
@@ -84,9 +64,10 @@ pub fn normalised_from_u8(encoded: [u8; 3]) -> [f32; 3] {
 ///     srgb::u8_from_normalised([0.83137256, 0.12941177, 0.23921569])
 /// );
 /// ```
-#[inline]
 #[doc(hidden)]
-pub fn u8_from_normalised(normalised: [f32; 3]) -> [u8; 3] {
+pub fn u8_from_normalised(
+    normalised: impl std::convert::Into<[f32; 3]>,
+) -> [u8; 3] {
     // Adding 0.5 is for rounding.
     arr_map(normalised, |v| v.clamp(0.0, 1.0).mul_add(255.0, 0.5) as u8)
 }
@@ -96,7 +77,7 @@ pub fn u8_from_normalised(normalised: [f32; 3]) -> [u8; 3] {
 ///
 /// This is just a convenience function which wraps gamma (see [`gamma`] module)
 /// and XYZ (see [`xyz`] module) conversions function together.
-pub fn u8_from_xyz(xyz: [f32; 3]) -> [u8; 3] {
+pub fn u8_from_xyz(xyz: impl std::convert::Into<[f32; 3]>) -> [u8; 3] {
     gamma::u8_from_linear(xyz::linear_from_xyz(xyz))
 }
 
@@ -104,7 +85,7 @@ pub fn u8_from_xyz(xyz: [f32; 3]) -> [u8; 3] {
 ///
 /// This is just a convenience function which wraps gamma (see [`gamma`] module)
 /// and XYZ (see [`xyz`] module) conversions function together.
-pub fn xyz_from_u8(rgb: [u8; 3]) -> [f32; 3] {
+pub fn xyz_from_u8(rgb: impl std::convert::Into<[u8; 3]>) -> [f32; 3] {
     xyz::xyz_from_linear(gamma::linear_from_u8(rgb))
 }
 
@@ -113,7 +94,7 @@ pub fn xyz_from_u8(rgb: [u8; 3]) -> [f32; 3] {
 ///
 /// This is just a convenience function which wraps gamma (see [`gamma`] module)
 /// and XYZ (see [`xyz`] module) conversions function together.
-pub fn normalised_from_xyz(xyz: [f32; 3]) -> [f32; 3] {
+pub fn normalised_from_xyz(xyz: impl std::convert::Into<[f32; 3]>) -> [f32; 3] {
     gamma::normalised_from_linear(xyz::linear_from_xyz(xyz))
 }
 
@@ -121,16 +102,16 @@ pub fn normalised_from_xyz(xyz: [f32; 3]) -> [f32; 3] {
 ///
 /// This is just a convenience function which wraps gamma (see [`gamma`] module)
 /// and XYZ (see [`xyz`] module) conversions function together.
-pub fn xyz_from_normalised(rgb: [f32; 3]) -> [f32; 3] {
+pub fn xyz_from_normalised(rgb: impl std::convert::Into<[f32; 3]>) -> [f32; 3] {
     xyz::xyz_from_linear(gamma::linear_from_normalised(rgb))
 }
 
 
-#[inline]
 pub(crate) fn arr_map<F: Copy, T: Copy, Fun: Fn(F) -> T>(
-    arr: [F; 3],
+    arr: impl std::convert::Into<[F; 3]>,
     f: Fun,
 ) -> [T; 3] {
+    let arr = arr.into();
     [f(arr[0]), f(arr[1]), f(arr[2])]
 }
 

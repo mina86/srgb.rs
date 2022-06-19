@@ -1,7 +1,7 @@
 [package]
 name          = "srgb"
 description   = "sRGB primitives and constants — lightweight crate with functions and constants needed when manipulating sRGB colours"
-version       = "0.3.0"
+version       = "0.3.1"
 readme        = "README.md"
 categories    = ["graphics", "multimedia::images", "multimedia::video"]
 keywords      = ["srgb", "xyz", "color", "rgb", "rec709"]
@@ -16,6 +16,7 @@ approx = "0.4"
 criterion = { version = "0.3.3", default-features = false }
 float_next_after = "0.1"
 kahan = "0.1"
+rgb = "0.8"
 
 [build-dependencies]
 rgb_derivation = "0.2"
