@@ -85,6 +85,10 @@ pub fn expand_u8(e: u8) -> f32 { U8_TO_LINEAR_LUT[e as usize] }
 ///
 /// See [`compress_u8_precise()`] function for version of the function which
 /// uses exact sRGB gamma formula (but is over 2.5 slower).
+///
+/// PS. This function’s performance is similar to that of `f32_to_srgb8` in the
+/// `fast-srgb8` crate while at the same time it offers around 1.8 bits more
+/// precision as measured with the above method.
 #[inline]
 pub fn compress_u8(s: f32) -> u8 {
     if !(s > FAST_START_AT) {
