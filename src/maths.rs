@@ -31,7 +31,6 @@ fn dot_product_fallback(a: &[f32; 3], b: &[f32; 3]) -> f32 {
 
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-#[cfg(any(target_feature = "sse", test))]
 mod sse {
     #[cfg(target_arch = "x86")]
     use ::core::arch::x86 as arch;
