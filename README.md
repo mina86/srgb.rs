@@ -10,11 +10,9 @@ finally provides functions for handling
 [Rec.709](https://www.itu.int/rec/R-REC-BT.709-6-201506-I/en)
 components encoding.
 
-It intents to offer low-level primitives needed to work with sRGB
-colour space.  Those primitives can be used by other libraries which
-need to convert between sRGB and other colour spaces (if the
-conversion requires going through XYZ colour space) or blend colours
-together (which requires performing gamma correction).
+It offers low-level primitives needed to work with sRGB standard.  Those
+primitives can be used by other libraries which need to convert between sRGB and
+other colour spaces or blend sRGB colours together.
 
 Functions provided in the main module implement conversions between
 sRGB and XYZ colour spaces.  Functions in [`gamma`] submodule provide
@@ -97,12 +95,11 @@ fn main() {
 
 ## `rgb` crate support
 
-This crate crate does not have an explicit [`rgb`
-crate](https://crates.io/crates/rgb) support.  However, since all
-functions taking an (s)RGB colour as argument accept `impl Into<[f32;
-3]>` or `impl Into<[u8; 3]>` it is possible to pass `RGB` structure to
-them.  Similarly, such functions return `[f32; 3]` or `[u8; 3]`which
-can be converted into an `RGB` structure.
+This crate doesn’t have an explicit [`rgb` crate](https://crates.io/crates/rgb)
+support.  However, since all functions taking an (s)RGB colour as argument
+accept `impl Into<[f32; 3]>` or `impl Into<[u8; 3]>` it is possible to pass
+`RGB` structure to them.  Similarly, such functions return `[f32; 3]` or `[u8;
+3]`which can be converted into an `RGB` structure.
 
 ```rust
 extern crate rgb;
