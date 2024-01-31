@@ -12,6 +12,7 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * srgb crate.  If not, see <http://www.gnu.org/licenses/>. */
+#![allow(clippy::neg_cmp_op_on_partial_ord)]
 
 //! Functions implementing sRGB gamma compression and expansion formulæ.
 
@@ -91,8 +92,8 @@ pub fn expand_u8(e: u8) -> f32 { U8_TO_LINEAR_LUT[e as usize] }
 /// precision as measured with the above method.
 #[inline]
 pub fn compress_u8(s: f32) -> u8 {
+    // Note: Using negated comparison to also catch NaNs.
     if !(s > FAST_START_AT) {
-        // Also handles NaN
         const D: f32 = 12.92 * 255.0;
         D.mul_add(s.max(0.0), 0.5) as u8
     } else if s < FAST_START_255_AT {
@@ -153,9 +154,8 @@ pub fn compress_u8(s: f32) -> u8 {
 /// ```
 #[inline]
 pub fn compress_u8_precise(s: f32) -> u8 {
-    // Adding 0.5 is for rounding.
+    // Adding 0.5 is for rounding.  Negated comparison is to catch NaNs.
     (if !(s > S_0) {
-        // Also handles NaNs.
         const D: f32 = 12.92 * 255.0;
         crate::maths::mul_add(s.max(0.0), D, 0.5)
     } else {
@@ -323,9 +323,8 @@ const FAST_LUT: [f32; 136] = [
 macro_rules! compress_rec709_impl {
     ($s:ident, $t:ty, $low:expr, $high:expr) => {{
         const RANGE: f32 = ($high - $low) as f32;
-        // Adding 0.5 is for rounding.
+        // Adding 0.5 is for rounding.  Negated comparison is to catch NaNs.
         (if !($s > 0.018) {
-            // Also handles NaNs.
             const D: f32 = 4.5 * RANGE;
             crate::maths::mul_add($s.max(0.0), D, 0.5)
         } else {
@@ -462,11 +461,11 @@ pub fn compress_rec709_10bit(s: f32) -> u16 {
 /// ```
 #[inline]
 pub fn expand_normalised(e: f32) -> f32 {
+    // Note: Using negated comparison to also catch NaNs.
     if !(e > E_0) {
-        // Also handles NaNs.
         e / 12.92
     } else {
-        ((e as f32 + 0.055) / 1.055).powf(2.4)
+        ((e + 0.055) / 1.055).powf(2.4)
     }
 }
 
@@ -490,8 +489,8 @@ pub fn expand_normalised(e: f32) -> f32 {
 /// ```
 #[inline]
 pub fn compress_normalised(s: f32) -> f32 {
+    // Note: Using negated comparison to also catch NaNs.
     if !(s > S_0) {
-        // Also handles NaNs.
         12.92 * s
     } else {
         crate::maths::mul_add(1.055, s.powf(1.0 / 2.4), -0.055)

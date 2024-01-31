@@ -14,6 +14,7 @@
  * srgb crate.  If not, see <http://www.gnu.org/licenses/>. */
 
 #![doc = include_str!("../README.md")]
+#![allow(clippy::excessive_precision)]
 
 pub mod gamma;
 pub mod xyz;

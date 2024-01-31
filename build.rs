@@ -89,6 +89,7 @@ fn gamma_compress_pow_part<T: num::traits::Float + num::traits::NumRef>(
     x.powf(exponent) * T::from(1.055).unwrap() - T::from(0.055).unwrap()
 }
 
+#[allow(clippy::op_ref)]
 pub fn calc_gamma_threshold<
     T: PartialOrd + num::traits::Float + num::traits::NumRef,
 >() -> T
@@ -98,12 +99,12 @@ where
     let mut hi = T::from(0.0032_f64).unwrap();
     let mut mid = T::zero();
     for _ in 0..(std::mem::size_of::<T>() * 8) {
-        mid = (&lo + &hi) / T::from(2_i16).unwrap();
+        mid = (lo + hi) / T::from(2_i16).unwrap();
         let lhs = gamma_compress_lin_part(&mid);
         let rhs = gamma_compress_pow_part(&mid);
         match lhs.partial_cmp(&rhs) {
-            Some(std::cmp::Ordering::Less) => lo = mid.clone(),
-            Some(std::cmp::Ordering::Greater) => hi = mid.clone(),
+            Some(std::cmp::Ordering::Less) => lo = mid,
+            Some(std::cmp::Ordering::Greater) => hi = mid,
             _ => break,
         };
     }
