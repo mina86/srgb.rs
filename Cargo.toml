@@ -25,7 +25,7 @@ num = "0.4"
 [build-dependencies.rug]
 version = "1.17"
 default-features = false
-features = ["float", "rational"]
+features = ["float", "rational", "std"]
 
 [[bench]]
 name = "xyz"
