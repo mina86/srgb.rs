@@ -142,6 +142,7 @@ mod test {
     fn testdot_product_sse() { unsupported("x86 or x86_64 CPU"); }
 
     #[test]
+    #[cfg_attr(miri, ignore = "Not supported on Miri")]
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     fn testdot_product_sse() {
         if is_x86_feature_detected!("sse") {

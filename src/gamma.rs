@@ -758,6 +758,7 @@ mod test {
     }
 
     #[test]
+    #[cfg_attr(miri, ignore = "Runs too slow on Miri")]
     fn test_compress_u8_increases() {
         // Starting at 0.0 makes this test dramatically slower so skip the first
         // few values.
@@ -790,6 +791,7 @@ mod test {
     }
 
     #[test]
+    #[cfg_attr(miri, ignore = "Runs too slow on Miri")]
     fn test_compress_u8_statistics() {
         fn edges(compress: fn(f32) -> u8) -> [f32; 255] {
             let mut edges = [0.0; 255];
