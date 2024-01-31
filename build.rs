@@ -33,7 +33,7 @@ fn chromaticity(x: (i64, i64), y: (i64, i64)) -> Chromaticity {
 /// Formats scalar as a floating point number.  If denominator isn’t one, the
 /// number is formatted as `n / d` string (where `n` and `d` are integers
 /// written as floating point numbers); otherwise just the numerator is written.
-fn fmt_scalar(scalar: &Scalar) -> std::string::String {
+fn fmt_scalar(scalar: &Scalar) -> String {
     let (numer, denom) = (scalar.numer(), scalar.denom());
     if numer.is_zero() || denom.is_one() {
         format!("{}.0", numer.to_str_radix(10))
@@ -46,7 +46,7 @@ fn fmt_scalar(scalar: &Scalar) -> std::string::String {
     }
 }
 
-fn fmt_vector(vec: &[Scalar; 3]) -> std::string::String {
+fn fmt_vector(vec: &[Scalar; 3]) -> String {
     format!(
         "[{}, {}, {}]",
         fmt_scalar(&vec[0]),
@@ -58,7 +58,7 @@ fn fmt_vector(vec: &[Scalar; 3]) -> std::string::String {
 fn fmt_matrix<T, D: std::fmt::Display>(
     matrix: &[T; 3],
     fmt: impl Fn(&T) -> D,
-) -> std::string::String {
+) -> String {
     format!(
         r#"[
     {},
@@ -71,7 +71,7 @@ fn fmt_matrix<T, D: std::fmt::Display>(
     )
 }
 
-fn fmt_chromaticity(ch: &Chromaticity) -> std::string::String {
+fn fmt_chromaticity(ch: &Chromaticity) -> String {
     fmt_vector(&[ch.x().clone(), ch.y().clone(), One::one()])
 }
 

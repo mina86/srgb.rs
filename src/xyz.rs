@@ -31,7 +31,7 @@
 /// assert_eq!([0.8071875, 0.82000005, 0.9353126], xyz_from_linear(white));
 /// assert_eq!([0.2990163, 0.16, 0.0655738], xyz_from_linear(red));
 /// ```
-pub fn xyz_from_linear(linear: impl std::convert::Into<[f32; 3]>) -> [f32; 3] {
+pub fn xyz_from_linear(linear: impl Into<[f32; 3]>) -> [f32; 3] {
     crate::maths::matrix_product(&XYZ_FROM_SRGB_MATRIX, linear.into())
 }
 
@@ -51,7 +51,7 @@ pub fn xyz_from_linear(linear: impl std::convert::Into<[f32; 3]>) -> [f32; 3] {
 /// assert_eq!([0.88901603, 0.7947985, 0.8663711], linear_from_xyz(white));
 /// assert_eq!([0.69039214, 0.013060069, 0.053315595], linear_from_xyz(red));
 /// ```
-pub fn linear_from_xyz(xyz: impl std::convert::Into<[f32; 3]>) -> [f32; 3] {
+pub fn linear_from_xyz(xyz: impl Into<[f32; 3]>) -> [f32; 3] {
     crate::maths::matrix_product(&SRGB_FROM_XYZ_MATRIX, xyz.into())
 }
 

@@ -517,7 +517,7 @@ pub fn compress_normalised(s: f32) -> f32 {
 /// );
 /// ```
 #[inline]
-pub fn linear_from_u8(encoded: impl std::convert::Into<[u8; 3]>) -> [f32; 3] {
+pub fn linear_from_u8(encoded: impl Into<[u8; 3]>) -> [f32; 3] {
     super::arr_map(encoded, expand_u8)
 }
 
@@ -541,7 +541,7 @@ pub fn linear_from_u8(encoded: impl std::convert::Into<[u8; 3]>) -> [f32; 3] {
 /// );
 /// ```
 #[inline]
-pub fn u8_from_linear(linear: impl std::convert::Into<[f32; 3]>) -> [u8; 3] {
+pub fn u8_from_linear(linear: impl Into<[f32; 3]>) -> [u8; 3] {
     super::arr_map(linear, compress_u8)
 }
 
@@ -567,7 +567,7 @@ pub fn u8_from_linear(linear: impl std::convert::Into<[f32; 3]>) -> [u8; 3] {
 /// ```
 #[inline]
 pub fn linear_from_normalised(
-    normalised: impl std::convert::Into<[f32; 3]>,
+    normalised: impl Into<[f32; 3]>,
 ) -> [f32; 3] {
     super::arr_map(normalised, expand_normalised)
 }
@@ -593,7 +593,7 @@ pub fn linear_from_normalised(
 /// ```
 #[inline]
 pub fn normalised_from_linear(
-    linear: impl std::convert::Into<[f32; 3]>,
+    linear: impl Into<[f32; 3]>,
 ) -> [f32; 3] {
     super::arr_map(linear, compress_normalised)
 }
@@ -766,7 +766,7 @@ mod test {
         let mut prev = compress_u8(value);
         assert_eq!(0, prev, "Didn’t start at zero");
         while value < 1.0 {
-            let next = value.next_after(std::f32::INFINITY);
+            let next = value.next_after(f32::INFINITY);
             let res = compress_u8(next);
             assert!(
                 prev <= res,
@@ -802,7 +802,7 @@ mod test {
             }
             edges[0] = x;
             loop {
-                x = x.next_after(std::f32::INFINITY);
+                x = x.next_after(f32::INFINITY);
                 assert!(x < 1.0);
                 let y = compress(x);
                 if y == 255 {

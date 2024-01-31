@@ -41,7 +41,7 @@ mod maths;
 /// ```
 #[doc(hidden)]
 pub fn normalised_from_u8(
-    encoded: impl std::convert::Into<[u8; 3]>,
+    encoded: impl Into<[u8; 3]>,
 ) -> [f32; 3] {
     arr_map(encoded, |v| v as f32 / 255.0)
 }
@@ -67,7 +67,7 @@ pub fn normalised_from_u8(
 /// ```
 #[doc(hidden)]
 pub fn u8_from_normalised(
-    normalised: impl std::convert::Into<[f32; 3]>,
+    normalised: impl Into<[f32; 3]>,
 ) -> [u8; 3] {
     // Adding 0.5 is for rounding.
     arr_map(normalised, |v| v.clamp(0.0, 1.0).mul_add(255.0, 0.5) as u8)
@@ -78,7 +78,7 @@ pub fn u8_from_normalised(
 ///
 /// This is just a convenience function which wraps gamma (see [`gamma`] module)
 /// and XYZ (see [`xyz`] module) conversions function together.
-pub fn u8_from_xyz(xyz: impl std::convert::Into<[f32; 3]>) -> [u8; 3] {
+pub fn u8_from_xyz(xyz: impl Into<[f32; 3]>) -> [u8; 3] {
     gamma::u8_from_linear(xyz::linear_from_xyz(xyz))
 }
 
@@ -86,7 +86,7 @@ pub fn u8_from_xyz(xyz: impl std::convert::Into<[f32; 3]>) -> [u8; 3] {
 ///
 /// This is just a convenience function which wraps gamma (see [`gamma`] module)
 /// and XYZ (see [`xyz`] module) conversions function together.
-pub fn xyz_from_u8(rgb: impl std::convert::Into<[u8; 3]>) -> [f32; 3] {
+pub fn xyz_from_u8(rgb: impl Into<[u8; 3]>) -> [f32; 3] {
     xyz::xyz_from_linear(gamma::linear_from_u8(rgb))
 }
 
@@ -95,7 +95,7 @@ pub fn xyz_from_u8(rgb: impl std::convert::Into<[u8; 3]>) -> [f32; 3] {
 ///
 /// This is just a convenience function which wraps gamma (see [`gamma`] module)
 /// and XYZ (see [`xyz`] module) conversions function together.
-pub fn normalised_from_xyz(xyz: impl std::convert::Into<[f32; 3]>) -> [f32; 3] {
+pub fn normalised_from_xyz(xyz: impl Into<[f32; 3]>) -> [f32; 3] {
     gamma::normalised_from_linear(xyz::linear_from_xyz(xyz))
 }
 
@@ -103,13 +103,13 @@ pub fn normalised_from_xyz(xyz: impl std::convert::Into<[f32; 3]>) -> [f32; 3] {
 ///
 /// This is just a convenience function which wraps gamma (see [`gamma`] module)
 /// and XYZ (see [`xyz`] module) conversions function together.
-pub fn xyz_from_normalised(rgb: impl std::convert::Into<[f32; 3]>) -> [f32; 3] {
+pub fn xyz_from_normalised(rgb: impl Into<[f32; 3]>) -> [f32; 3] {
     xyz::xyz_from_linear(gamma::linear_from_normalised(rgb))
 }
 
 
 pub(crate) fn arr_map<F: Copy, T: Copy, Fun: Fn(F) -> T>(
-    arr: impl std::convert::Into<[F; 3]>,
+    arr: impl Into<[F; 3]>,
     f: Fun,
 ) -> [T; 3] {
     let arr = arr.into();
