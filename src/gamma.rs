@@ -566,9 +566,7 @@ pub fn u8_from_linear(linear: impl Into<[f32; 3]>) -> [u8; 3] {
 /// );
 /// ```
 #[inline]
-pub fn linear_from_normalised(
-    normalised: impl Into<[f32; 3]>,
-) -> [f32; 3] {
+pub fn linear_from_normalised(normalised: impl Into<[f32; 3]>) -> [f32; 3] {
     super::arr_map(normalised, expand_normalised)
 }
 
@@ -592,9 +590,7 @@ pub fn linear_from_normalised(
 /// );
 /// ```
 #[inline]
-pub fn normalised_from_linear(
-    linear: impl Into<[f32; 3]>,
-) -> [f32; 3] {
+pub fn normalised_from_linear(linear: impl Into<[f32; 3]>) -> [f32; 3] {
     super::arr_map(linear, compress_normalised)
 }
 

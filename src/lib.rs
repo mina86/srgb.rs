@@ -40,9 +40,7 @@ mod maths;
 /// );
 /// ```
 #[doc(hidden)]
-pub fn normalised_from_u8(
-    encoded: impl Into<[u8; 3]>,
-) -> [f32; 3] {
+pub fn normalised_from_u8(encoded: impl Into<[u8; 3]>) -> [f32; 3] {
     arr_map(encoded, |v| v as f32 / 255.0)
 }
 
@@ -66,9 +64,7 @@ pub fn normalised_from_u8(
 /// );
 /// ```
 #[doc(hidden)]
-pub fn u8_from_normalised(
-    normalised: impl Into<[f32; 3]>,
-) -> [u8; 3] {
+pub fn u8_from_normalised(normalised: impl Into<[f32; 3]>) -> [u8; 3] {
     // Adding 0.5 is for rounding.
     arr_map(normalised, |v| v.clamp(0.0, 1.0).mul_add(255.0, 0.5) as u8)
 }
