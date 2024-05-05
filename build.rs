@@ -15,8 +15,7 @@
 
 use std::io::Write;
 
-use num::One;
-use num::Zero;
+use num::{One, Zero};
 
 type Scalar = num::BigRational;
 type Chromaticity = rgb_derivation::Chromaticity<Scalar>;
@@ -38,11 +37,7 @@ fn fmt_scalar(scalar: &Scalar) -> String {
     if numer.is_zero() || denom.is_one() {
         format!("{}.0", numer.to_str_radix(10))
     } else {
-        format!(
-            "{}.0 / {}.0",
-            numer.to_str_radix(10),
-            denom.to_str_radix(10)
-        )
+        format!("{}.0 / {}.0", numer.to_str_radix(10), denom.to_str_radix(10))
     }
 }
 
