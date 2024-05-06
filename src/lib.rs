@@ -15,6 +15,7 @@
 
 #![doc = include_str!("../README.md")]
 #![allow(clippy::excessive_precision)]
+#![allow(clippy::needless_doctest_main)]
 
 pub mod gamma;
 pub mod xyz;
