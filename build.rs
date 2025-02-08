@@ -232,7 +232,7 @@ pub const SRGB_FROM_XYZ_MATRIX: [[f32; 3]; 3] = {inverse};
 /// the value at which the gamma compression switches between the two regimes.
 /// In theory it’s also an argument at which both parts produce the same result
 /// though that’s subject to floating-point rounding.
-pub const S_0: f32 = {:.};
+pub const S_0: f32 = {};
 
 /// The threshold at which sRGB gamma expansion switches from linear to power
 /// function.
@@ -243,7 +243,7 @@ pub const S_0: f32 = {:.};
 /// the value at which the gamma expansion switches between the two regimes.
 /// In theory it’s also an argument at which both parts produce the same result
 /// though that’s subject to floating-point rounding.
-pub const E_0: f32 = {:.};
+pub const E_0: f32 = {};
 
 const U8_TO_LINEAR_LUT: [f32; 256] = [
 {}
