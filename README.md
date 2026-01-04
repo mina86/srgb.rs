@@ -34,7 +34,7 @@ dependency:
 
 ```toml
 [dependencies]
-srgb = "0.3"
+srgb = "0.3.5"
 ```
 
 With it in place, it’s now possible to write an application which

@@ -1,7 +1,7 @@
 [package]
 name          = "srgb"
 description   = "sRGB primitives and constants — lightweight crate with functions and constants needed when manipulating sRGB colours"
-version       = "0.3.4"
+version       = "0.3.5"
 readme        = "README.md"
 categories    = ["graphics", "multimedia::images", "multimedia::video"]
 keywords      = ["srgb", "xyz", "color", "rgb", "rec709"]
