@@ -42,7 +42,7 @@ mod maths;
 /// ```
 #[doc(hidden)]
 pub fn normalised_from_u8(encoded: impl Into<[u8; 3]>) -> [f32; 3] {
-    arr_map(encoded, |v| v as f32 / 255.0)
+    encoded.into().map(|v| v as f32 / 255.0)
 }
 
 /// Converts an sRGB colour in normalised representation into a 24-bit (also
@@ -67,7 +67,7 @@ pub fn normalised_from_u8(encoded: impl Into<[u8; 3]>) -> [f32; 3] {
 #[doc(hidden)]
 pub fn u8_from_normalised(normalised: impl Into<[f32; 3]>) -> [u8; 3] {
     // Adding 0.5 is for rounding.
-    arr_map(normalised, |v| v.clamp(0.0, 1.0).mul_add(255.0, 0.5) as u8)
+    normalised.into().map(|v| v.clamp(0.0, 1.0).mul_add(255.0, 0.5) as u8)
 }
 
 
@@ -102,15 +102,6 @@ pub fn normalised_from_xyz(xyz: impl Into<[f32; 3]>) -> [f32; 3] {
 /// and XYZ (see [`xyz`] module) conversions function together.
 pub fn xyz_from_normalised(rgb: impl Into<[f32; 3]>) -> [f32; 3] {
     xyz::xyz_from_linear(gamma::linear_from_normalised(rgb))
-}
-
-
-pub(crate) fn arr_map<F: Copy, T: Copy, Fun: Fn(F) -> T>(
-    arr: impl Into<[F; 3]>,
-    f: Fun,
-) -> [T; 3] {
-    let arr = arr.into();
-    [f(arr[0]), f(arr[1]), f(arr[2])]
 }
 
 

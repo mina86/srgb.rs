@@ -514,7 +514,7 @@ pub fn compress_normalised(s: f32) -> f32 {
 /// ```
 #[inline]
 pub fn linear_from_u8(encoded: impl Into<[u8; 3]>) -> [f32; 3] {
-    super::arr_map(encoded, expand_u8)
+    encoded.into().map(expand_u8)
 }
 
 /// Converts an sRGB colour in linear space to a 24-bit sRGB colour (also known
@@ -538,7 +538,7 @@ pub fn linear_from_u8(encoded: impl Into<[u8; 3]>) -> [f32; 3] {
 /// ```
 #[inline]
 pub fn u8_from_linear(linear: impl Into<[f32; 3]>) -> [u8; 3] {
-    super::arr_map(linear, compress_u8)
+    linear.into().map(compress_u8)
 }
 
 
@@ -563,7 +563,7 @@ pub fn u8_from_linear(linear: impl Into<[f32; 3]>) -> [u8; 3] {
 /// ```
 #[inline]
 pub fn linear_from_normalised(normalised: impl Into<[f32; 3]>) -> [f32; 3] {
-    super::arr_map(normalised, expand_normalised)
+    normalised.into().map(expand_normalised)
 }
 
 /// Converts an sRGB colour in linear space to normalised space.
@@ -587,7 +587,7 @@ pub fn linear_from_normalised(normalised: impl Into<[f32; 3]>) -> [f32; 3] {
 /// ```
 #[inline]
 pub fn normalised_from_linear(linear: impl Into<[f32; 3]>) -> [f32; 3] {
-    super::arr_map(linear, compress_normalised)
+    linear.into().map(compress_normalised)
 }
 
 
