@@ -97,20 +97,16 @@ pub fn compress_u8(s: f32) -> u8 {
         const D: f32 = 12.92 * 255.0;
         D.mul_add(s.max(0.0), 0.5) as u8
     } else if s < FAST_START_255_AT {
-        /* Would like to do those asserts but f32::to_bits is not a const fn.
+        const {
+            // Make sure x.to_bits() - FAST_BITS_OFFSET is not negative.
+            assert!(FAST_START_AT.to_bits() >= FAST_BITS_OFFSET);
 
-        // Make sure x.to_bits() - FAST_BITS_OFFSET is not negative.
-        const _COND1: bool = FAST_START_AT.to_bits() >= FAST_BITS_OFFSET;
-        const _: [(); 1] = [(); _COND1 as usize];
-
-        // Make sure that LUT contains enough entries.
-        const _START: u32 = FAST_BITS_OFFSET;
-        const _END: u32 = FAST_START_255_AT.to_bits();
-        const _LUT_LEN: u32 = ((_END - _START) >> FAST_SHIFT) + 1;
-        const _COND2: bool = (_LUT_LEN as usize) == FAST_LUT.len();
-        const _: [(); 1] = [(); _COND2 as usize];
-
-        */
+            // Make sure that LUT contains enough entries.
+            let start = FAST_BITS_OFFSET;
+            let end = FAST_START_255_AT.to_bits();
+            let lut_last_idx = ((end - start) >> FAST_SHIFT) + 1;
+            assert!(lut_last_idx as usize + 1 == FAST_LUT.len());
+        }
 
         let bits = s.to_bits() - FAST_BITS_OFFSET;
         let lft_x = (bits >> FAST_SHIFT) as usize;
