@@ -19,8 +19,8 @@ kahan = "0.1"
 rgb = "0.8"
 
 [build-dependencies]
-rgb_derivation = "0.2"
 num = "0.4"
+rgb_derivation = "0.2.2"
 
 [build-dependencies.rug]
 version = "1.17"

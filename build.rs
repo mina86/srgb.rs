@@ -50,24 +50,17 @@ fn fmt_vector(vec: &[Scalar; 3]) -> String {
     )
 }
 
-fn fmt_matrix<T, D: std::fmt::Display>(
-    matrix: &[T; 3],
-    fmt: impl Fn(&T) -> D,
-) -> String {
+fn fmt_matrix(matrix: &[[Scalar; 3]; 3]) -> String {
     format!(
         r#"[
     {},
     {},
     {},
 ]"#,
-        fmt(&matrix[0]),
-        fmt(&matrix[1]),
-        fmt(&matrix[2])
+        fmt_vector(&matrix[0]),
+        fmt_vector(&matrix[1]),
+        fmt_vector(&matrix[2])
     )
-}
-
-fn fmt_chromaticity(ch: &Chromaticity) -> String {
-    fmt_vector(&[ch.x().clone(), ch.y().clone(), One::one()])
 }
 
 
@@ -140,6 +133,21 @@ fn generate() -> std::io::Result<()> {
     let inverse = rgb_derivation::matrix::inversed_copy(&matrix).unwrap();
     let primaries_xyz = rgb_derivation::matrix::transposed_copy(&matrix);
 
+    let white_xyy = {
+        let (x, y) = white_xy.into_xy();
+        [x, y, One::one()]
+    };
+    let primaries_xyy = {
+        let mut arr = primaries_xy.map(|ch| {
+            let (x, y) = ch.into_xy();
+            [x, y, Zero::zero()]
+        });
+        for (dst, src) in arr.iter_mut().zip(primaries_xyz.iter()) {
+            dst[2] = src[1].clone();
+        }
+        arr
+    };
+
     write_to(
         &out_dir,
         "xyz_constants.rs",
@@ -182,12 +190,12 @@ pub const XYZ_FROM_SRGB_MATRIX: [[f32; 3]; 3] = {matrix};
 /// following formula: `RGB = SRGB_FROM_XYZ_MATRIX ✕ XYZ`.
 pub const SRGB_FROM_XYZ_MATRIX: [[f32; 3]; 3] = {inverse};
 ",
-            white_xyY = fmt_chromaticity(&white_xy),
+            white_xyY = fmt_vector(&white_xyy),
             white_XYZ = fmt_vector(&white_xyz),
-            primaries_xyY = fmt_matrix(&primaries_xy, fmt_chromaticity),
-            primaries_XYZ = fmt_matrix(&primaries_xyz, fmt_vector),
-            matrix = fmt_matrix(&matrix, fmt_vector),
-            inverse = fmt_matrix(&inverse, fmt_vector)
+            primaries_xyY = fmt_matrix(&primaries_xyy),
+            primaries_XYZ = fmt_matrix(&primaries_xyz),
+            matrix = fmt_matrix(&matrix),
+            inverse = fmt_matrix(&inverse)
         ),
     )?;
 
