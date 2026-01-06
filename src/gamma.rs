@@ -594,7 +594,6 @@ pub fn normalised_from_linear(linear: impl Into<[f32; 3]>) -> [f32; 3] {
 #[cfg(test)]
 mod test {
     use approx::assert_ulps_eq;
-    use float_next_after::NextAfter;
     use xsum::Xsum;
 
     use super::*;
@@ -759,7 +758,7 @@ mod test {
         let mut prev = compress_u8(value);
         assert_eq!(0, prev, "Didn’t start at zero");
         while value < 1.0 {
-            let next = value.next_after(f32::INFINITY);
+            let next = f32::from_bits(value.to_bits() + 1);
             let res = compress_u8(next);
             assert!(
                 prev <= res,
@@ -795,7 +794,7 @@ mod test {
             }
             edges[0] = x;
             loop {
-                x = x.next_after(f32::INFINITY);
+                x = f32::from_bits(x.to_bits() + 1);
                 assert!(x < 1.0);
                 let y = compress(x);
                 if y == 255 {
