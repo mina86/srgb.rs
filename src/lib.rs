@@ -107,7 +107,7 @@ pub fn xyz_from_normalised(rgb: impl Into<[f32; 3]>) -> [f32; 3] {
 
 #[cfg(test)]
 mod test {
-    use kahan::KahanSummator;
+    use xsum::{Xsum, XsumExt};
 
     const WHITE_X: f64 = 0.312713;
     const WHITE_Y: f64 = 0.329016;
@@ -115,15 +115,14 @@ mod test {
     fn measure_grey_chromaticity_error(f: impl Fn(u8) -> [f32; 3]) -> f64 {
         // Grey colours should have chromaticity equal white point’s
         // chromaticity.
-        let mut error = kahan::KahanSum::new();
+        let mut error = xsum::XsumSmall::default();
         for i in 1..=255 {
             let [x, y, z] = f(i);
-            let d: f64 =
-                [x as f64, y as f64, z as f64].iter().kahan_sum().sum();
+            let d = [x as f64, y as f64, z as f64].xsum();
             let x = x as f64 / d - WHITE_X;
             let y = y as f64 / d - WHITE_Y;
-            error += x * x;
-            error += y * y;
+            error.add(x * x);
+            error.add(y * y);
         }
         error.sum() * 1e15
     }

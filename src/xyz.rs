@@ -61,6 +61,8 @@ include!(concat!(env!("OUT_DIR"), "/xyz_constants.rs"));
 
 #[cfg(test)]
 mod test {
+    use xsum::Xsum;
+
     #[test]
     fn test_d65() {
         let [x, y, _] = super::D65_xyY;
@@ -77,7 +79,7 @@ mod test {
 
     #[test]
     fn test_reversible_conversion() {
-        let mut error = kahan::KahanSum::new();
+        let mut error = xsum::XsumSmall::default();
         for c in 0..(16 * 16 * 16) {
             let r = (c & 15) as f32 / 15.0;
             let g = ((c >> 4) & 15) as f32 / 15.0;
@@ -89,9 +91,9 @@ mod test {
             let r = r as f64 - dst[0] as f64;
             let g = g as f64 - dst[1] as f64;
             let b = b as f64 - dst[2] as f64;
-            error += r * r;
-            error += g * g;
-            error += b * b;
+            error.add(r * r);
+            error.add(g * g);
+            error.add(b * b);
         }
         assert_eq!(62.71521153793259, error.sum() * 1e12);
     }

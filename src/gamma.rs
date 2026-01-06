@@ -595,6 +595,7 @@ pub fn normalised_from_linear(linear: impl Into<[f32; 3]>) -> [f32; 3] {
 mod test {
     use approx::assert_ulps_eq;
     use float_next_after::NextAfter;
+    use xsum::Xsum;
 
     use super::*;
 
@@ -731,16 +732,16 @@ mod test {
 
     #[test]
     fn test_round_trip_error() {
-        let mut error_ec = kahan::KahanSum::new();
-        let mut error_ce = kahan::KahanSum::new();
+        let mut error_ec = xsum::XsumSmall::default();
+        let mut error_ce = xsum::XsumSmall::default();
         for i in 0..=1000 {
             let want = i as f32 / 1000.0;
             let diff = want as f64 -
                 compress_normalised(expand_normalised(want)) as f64;
-            error_ec += diff * diff;
+            error_ec.add(diff * diff);
             let diff = want as f64 -
                 expand_normalised(compress_normalised(want)) as f64;
-            error_ce += diff * diff;
+            error_ce.add(diff * diff);
         }
 
         assert_eq!(
@@ -808,25 +809,24 @@ mod test {
         let got = edges(compress_u8);
 
         let mut max_abs_error = 0.0;
-        let mut abs_error = kahan::KahanSum::new();
-        let mut squared_error = kahan::KahanSum::new();
+        let mut abs_error = xsum::XsumSmall::default();
+        let mut squared_error = xsum::XsumSmall::default();
         for (a, b) in want.iter().zip(got.iter()) {
-            let err = (a - b).abs();
-            abs_error += err;
-            squared_error += err * err;
+            let err = (*a as f64 - *b as f64).abs();
+            abs_error.add(err);
+            squared_error.add(err * err);
             if err > max_abs_error {
                 max_abs_error = err;
             }
         }
 
-        let scale = (1 << 14) as f32;
-        let count = want.len() as f32;
-        let aad = abs_error.sum() / count * scale;
-        let rmse = (squared_error.sum() / count).sqrt() * scale;
+        let scale = (1 << 14) as f64;
+        let aad = abs_error.sum() / 255.0 * scale;
+        let rmse = (squared_error.sum() / 255.0).sqrt() * scale;
         max_abs_error *= scale;
 
         assert_eq!(
-            (0.8496094, 0.27195325, 0.34617355),
+            (0.849609375, 0.27195325365253525, 0.3461735427106926),
             (max_abs_error, aad, rmse)
         );
     }

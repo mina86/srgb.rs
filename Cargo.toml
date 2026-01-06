@@ -16,8 +16,8 @@ edition       = "2021"
 approx = "0.5"
 criterion = { version = "0.4", default-features = false }
 float_next_after = "0.1"
-kahan = "0.1"
 rgb = "0.8"
+xsum = "0.1.6"
 
 [build-dependencies]
 num = "0.4"
