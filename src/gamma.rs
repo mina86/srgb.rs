@@ -317,34 +317,35 @@ const FAST_LUT: [f32; 136] = [
 
 
 macro_rules! compress_rec709_impl {
-    ($s:ident, $t:ty, $low:expr, $high:expr) => {{
-        const RANGE: f32 = ($high - $low) as f32;
+    ($s:ident, $t:ty, $low:expr, $range:expr) => {{
         // Adding 0.5 is for rounding.  Negated comparison is to catch NaNs.
         (if !($s > 0.018) {
-            const D: f32 = 4.5 * RANGE;
-            crate::maths::mul_add($s.max(0.0), D, 0.5)
+            crate::maths::mul_add(
+                $s.max(0.0),
+                const { 4.5 * $range as f32 },
+                0.5,
+            )
         } else {
-            const A: f32 = 0.099 * RANGE;
-            const D: f32 = 1.099 * RANGE;
-            crate::maths::mul_add(D, $s.min(1.0).powf(0.45), -A + 0.5)
+            let d = const { 1.099 * $range as f32 };
+            let a = const { 0.5 - 0.099 * $range as f32 };
+            crate::maths::mul_add(d, $s.min(1.0).powf(0.45), a)
         }) as $t +
             $low
     }};
 }
 
 macro_rules! expand_rec709_impl {
-    ($e:ident, $t:ty, $low:expr, $high:expr) => {{
-        const RANGE: f32 = ($high - $low) as f32;
-        const THRESHOLD: $t = (4.5 * 0.018 * RANGE) as $t + $low;
+    ($e:ident, $t:ty, $low:expr, $range:expr) => {{
+        let threshold = const { (4.5 * 0.018 * $range as f32) as $t + $low };
         if $e <= $low {
             0.0
-        } else if $e <= THRESHOLD {
-            const D: f32 = 4.5 * RANGE;
-            ($e - $low) as f32 / D
-        } else if $e < $high {
-            const A: f32 = 0.099 * RANGE;
-            const D: f32 = 1.099 * RANGE;
-            ((($e - $low) as f32 + A) / D).powf(1.0 / 0.45)
+        } else if $e <= threshold {
+            let d = const { 4.5 * $range as f32 };
+            ($e - $low) as f32 / d
+        } else if $e < const { $low + $range } {
+            let a = const { 0.099 * $range as f32 };
+            let d = const { 1.099 * $range as f32 };
+            ((($e - $low) as f32 + a) / d).powf(1.0 / 0.45)
         } else {
             1.0
         }
@@ -370,7 +371,7 @@ macro_rules! expand_rec709_impl {
 /// assert_eq!(1.0,          srgb::gamma::expand_rec709_8bit(255));
 /// ```
 #[inline]
-pub fn expand_rec709_8bit(e: u8) -> f32 { expand_rec709_impl!(e, u8, 16, 235) }
+pub fn expand_rec709_8bit(e: u8) -> f32 { expand_rec709_impl!(e, u8, 16, 219) }
 
 /// Performs an sRGB gamma compression on specified linear component and encodes
 /// result as an integer in the [16, 235] range.
@@ -390,7 +391,7 @@ pub fn expand_rec709_8bit(e: u8) -> f32 { expand_rec709_impl!(e, u8, 16, 235) }
 /// ```
 #[inline]
 pub fn compress_rec709_8bit(s: f32) -> u8 {
-    compress_rec709_impl!(s, u8, 16, 235)
+    compress_rec709_impl!(s, u8, 16, 219)
 }
 
 /// Performs an Rec.709 gamma expansion on specified component value whose range
@@ -412,9 +413,7 @@ pub fn compress_rec709_8bit(s: f32) -> u8 {
 /// assert_eq!(1.0,           srgb::gamma::expand_rec709_10bit(1023));
 /// ```
 #[inline]
-pub fn expand_rec709_10bit(e: u16) -> f32 {
-    expand_rec709_impl!(e, u16, 64, 940)
-}
+pub fn expand_rec709_10bit(e: u16) -> f32 { expand_rec709::<10>(e) }
 
 /// Performs an Rec.709 gamma compression on specified linear component and
 /// encodes result as an integer in the [64, 940] range.
@@ -433,10 +432,66 @@ pub fn expand_rec709_10bit(e: u16) -> f32 {
 /// assert_eq!( 940, srgb::gamma::compress_rec709_10bit(1.0));
 /// ```
 #[inline]
-pub fn compress_rec709_10bit(s: f32) -> u16 {
-    compress_rec709_impl!(s, u16, 64, 940)
+pub fn compress_rec709_10bit(s: f32) -> u16 { compress_rec709::<10>(s) }
+
+/// Performs an Rec.709 gamma expansion on specified N-bit component value.
+///
+/// The value is clamped to the [16*2^(N-8), 235^(N-8)] range which corresponds
+/// to Rec.709 coding.  `N` must be between 8 and 16; if `N` is 8, see also
+/// [`expand_rec709_8bit`].
+///
+/// # Example
+///
+/// ```
+/// assert_eq!([
+///   // 8-bit         10-bit        12-bit
+///     [0.0040588533, 0.0,          0.0],          // expand( 20)
+///     [0.10074095,   0.0040588533, 0.0],          // expand( 80)
+///     [0.70524263,   0.038659476,  0.0],          // expand(200)
+///     [1.0,          0.10074095,   0.0040588533], // expand(320)
+///     [1.0,          0.160575,     0.00913242],   // expand(400)
+///     [1.0,          0.70524263,   0.038659476],  // expand(800)
+/// ], [20, 80, 200, 320, 400, 800].map(|e| [
+///     srgb::gamma::expand_rec709::<8>(e),
+///     srgb::gamma::expand_rec709::<10>(e),
+///     srgb::gamma::expand_rec709::<12>(e),
+/// ]));
+/// ```
+pub fn expand_rec709<const N: usize>(e: u16) -> f32 {
+    const { assert!(8 <= N && N <= 16) };
+    expand_rec709_impl!(e, u16, 16 << (N - 8), 219 << (N - 8))
 }
 
+/// Performs an Rec.709 gamma compression on specified linear component and
+/// encodes result as an integer in the appropriate `N`-bit range.
+///
+/// The value is clamped to the [0.0, 1.0] range.  The range of the result
+/// corresponds to [16*2^(N-8), 235^(N-8)] range which corresponds to Rec.709
+/// coding.  `N` must be between 8 and 16.  If `N` is 8, see also
+/// [`compress_rec709_8bit`].
+///
+/// Note that Rec.709 transfer function is different from sRGB transfer function
+/// (even though both standards use the same primaries and white point).
+///
+/// # Example
+///
+/// ```
+/// assert_eq!([
+/// //N=  8     10    12
+///     [ 16,   64,  256], // compress(0.0)
+///     [ 16,   66,  264], // compress(0.0005)
+///     [199,  797, 3189], // compress(0.7)
+///     [235,  940, 3760], // compress(1.0)
+/// ], [0.0, 0.0005, 0.7, 1.0].map(|s| [
+///     srgb::gamma::compress_rec709::<8>(s),
+///     srgb::gamma::compress_rec709::<10>(s),
+///     srgb::gamma::compress_rec709::<12>(s),
+/// ]));
+/// ```
+pub fn compress_rec709<const N: usize>(s: f32) -> u16 {
+    const { assert!(8 <= N && N <= 16) };
+    compress_rec709_impl!(s, u16, 16 << (N - 8), 219 << (N - 8))
+}
 
 /// Performs an sRGB gamma expansion on specified normalised component value.
 ///
