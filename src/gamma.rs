@@ -326,7 +326,7 @@ macro_rules! compress_rec709_impl {
         } else {
             const A: f32 = 0.099 * RANGE;
             const D: f32 = 1.099 * RANGE;
-            crate::maths::mul_add(D, $s.min(1.0).powf(1.0 / 2.2), -A + 0.5)
+            crate::maths::mul_add(D, $s.min(1.0).powf(0.45), -A + 0.5)
         }) as $t +
             $low
     }};
@@ -344,7 +344,7 @@ macro_rules! expand_rec709_impl {
         } else if $e < $high {
             const A: f32 = 0.099 * RANGE;
             const D: f32 = 1.099 * RANGE;
-            ((($e - $low) as f32 + A) / D).powf(2.2)
+            ((($e - $low) as f32 + A) / D).powf(1.0 / 0.45)
         } else {
             1.0
         }
@@ -365,7 +365,7 @@ macro_rules! expand_rec709_impl {
 /// assert_eq!(0.0,          srgb::gamma::expand_rec709_8bit(  0));
 /// assert_eq!(0.0,          srgb::gamma::expand_rec709_8bit( 16));
 /// assert_eq!(0.0020294266, srgb::gamma::expand_rec709_8bit( 18));
-/// assert_eq!(0.9548653,    srgb::gamma::expand_rec709_8bit(230));
+/// assert_eq!(0.9544199,    srgb::gamma::expand_rec709_8bit(230));
 /// assert_eq!(1.0,          srgb::gamma::expand_rec709_8bit(235));
 /// assert_eq!(1.0,          srgb::gamma::expand_rec709_8bit(255));
 /// ```
@@ -407,7 +407,7 @@ pub fn compress_rec709_8bit(s: f32) -> u8 {
 /// assert_eq!(0.0,           srgb::gamma::expand_rec709_10bit(   0));
 /// assert_eq!(0.0,           srgb::gamma::expand_rec709_10bit(  64));
 /// assert_eq!(0.00152207,    srgb::gamma::expand_rec709_10bit(  70));
-/// assert_eq!(0.7077097,     srgb::gamma::expand_rec709_10bit( 800));
+/// assert_eq!(0.70524263,    srgb::gamma::expand_rec709_10bit( 800));
 /// assert_eq!(1.0,           srgb::gamma::expand_rec709_10bit( 940));
 /// assert_eq!(1.0,           srgb::gamma::expand_rec709_10bit(1023));
 /// ```
@@ -429,7 +429,7 @@ pub fn expand_rec709_10bit(e: u16) -> f32 {
 /// ```
 /// assert_eq!(  64, srgb::gamma::compress_rec709_10bit(0.0));
 /// assert_eq!(  70, srgb::gamma::compress_rec709_10bit(0.0015));
-/// assert_eq!( 800, srgb::gamma::compress_rec709_10bit(0.7077));
+/// assert_eq!( 800, srgb::gamma::compress_rec709_10bit(0.70524263));
 /// assert_eq!( 940, srgb::gamma::compress_rec709_10bit(1.0));
 /// ```
 #[inline]
