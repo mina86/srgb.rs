@@ -105,7 +105,7 @@ pub fn xyz_from_normalised(rgb: impl Into<[f32; 3]>) -> [f32; 3] {
 }
 
 
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 mod test {
     use xsum::{Xsum, XsumExt};
 

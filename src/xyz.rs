@@ -78,6 +78,7 @@ mod test {
     }
 
     #[test]
+    #[cfg_attr(miri, ignore = "Runs too slow on Miri")]
     fn test_reversible_conversion() {
         let mut error = xsum::XsumSmall::default();
         for c in 0..(16 * 16 * 16) {

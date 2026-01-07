@@ -698,7 +698,7 @@ mod test {
             assert_ulps_eq!(
                 s,
                 expand_normalised(e as f32 / 255.0),
-                max_ulps = 5
+                max_ulps = if cfg!(miri) { 8 } else { 4 },
             );
         }
     }
@@ -706,7 +706,11 @@ mod test {
     #[test]
     fn test_compress_normalised() {
         for (s, e) in CASES.iter().copied() {
-            assert_ulps_eq!(e as f32 / 255.0, compress_normalised(s));
+            assert_ulps_eq!(
+                e as f32 / 255.0,
+                compress_normalised(s),
+                max_ulps = if cfg!(miri) { 8 } else { 4 }
+            );
         }
     }
 
@@ -764,6 +768,7 @@ mod test {
     }
 
     #[test]
+    #[cfg_attr(miri, ignore = "Miri has noisy f32 implementation")]
     fn test_rec709_scaling() {
         for v in 16..=235 {
             let expanded = expand_rec709_8bit(v);
@@ -776,6 +781,7 @@ mod test {
     }
 
     #[test]
+    #[cfg_attr(miri, ignore = "Miri has noisy f32 implementation")]
     fn test_round_trip_normalised() {
         for i in 0..=1000 {
             let want = i as f32 / 1000.0;
@@ -785,6 +791,7 @@ mod test {
     }
 
     #[test]
+    #[cfg_attr(miri, ignore = "Miri has noisy f32 implementation")]
     fn test_round_trip_error() {
         let mut error_ec = xsum::XsumSmall::default();
         let mut error_ce = xsum::XsumSmall::default();
