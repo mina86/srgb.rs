@@ -847,23 +847,27 @@ mod test {
     #[test]
     #[cfg_attr(miri, ignore = "Runs too slow on Miri")]
     fn test_compress_u8_statistics() {
-        fn edges(compress: fn(f32) -> u8) -> [f32; 255] {
-            let mut edges = [0.0; 255];
-            let mut x = 0.0001;
-            while compress(x) != 0 {
-                x *= 0.5;
-                assert_ne!(x, 0.0);
-            }
-            edges[0] = x;
-            loop {
-                x = f32::from_bits(x.to_bits() + 1);
-                assert!(x < 1.0);
-                let y = compress(x);
-                if y == 255 {
-                    break edges;
+        fn edges(compress: impl Fn(f32) -> u8) -> [f32; 255] {
+            let mut edges = [-1.0; 255];
+            for (n, e) in edges.iter_mut().enumerate() {
+                let mut low = 0.0f32.to_bits();
+                let mut high = 1.0f32.to_bits();
+                while low <= high {
+                    let mid = low + (high - low) / 2;
+                    let val = compress(f32::from_bits(mid));
+                    if val <= n as u8 {
+                        // If the val ≤ n, this could be our answer, but there
+                        // might be a larger value further right so we continue.
+                        if val == n as u8 {
+                            *e = f32::from_bits(mid);
+                        }
+                        low = mid + 1;
+                    } else {
+                        high = mid - 1;
+                    }
                 }
-                edges[y as usize] = x;
             }
+            edges
         }
 
         let want = edges(compress_u8_precise);
